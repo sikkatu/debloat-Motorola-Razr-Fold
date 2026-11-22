@@ -61,7 +61,7 @@ Turn on USB debugging, connect the phone with a cable and make `adb devices` sho
 
 All commands in this guide are typed in a terminal on the PC. If a command has to be typed on the phone itself, I say so separately.
 
-**If the answer is not what is written here.** Stop and do not go further. In such places the guide says “show the output in the chat from the header”: this is the [Telegram chat](https://t.me/motorolafold) from the header of the document. Write which step and which item you stopped at, and attach the whole output of the command.
+**If the answer is not what is written here.** Stop and do not go further: the next commands are written for the answer that is described, and with a different answer they can break something. In such places the guide says what to do: skip the step, repeat an item or bring a package back. If it does not say, bring back what you removed last with the commands from the “Rollback” section and do not go on until the phone works as before.
 
 **How to reboot the phone.** When the guide says “reboot the phone” after commands that remove or restore apps, do it like this (on the PC):
 
@@ -240,7 +240,7 @@ GU=$(adb shell pm list users | grep -o '{[0-9]*:Google:' | tail -n 1 | tr -dc '0
 echo Google profile number: $GU
 ```
 
-The same number as in the `Success` line should be printed. If no number is printed, stop and show the output of the `adb shell pm list users` command in the chat from the header.
+The same number as in the `Success` line should be printed. If no number is printed, stop: either adb does not see the phone (check `adb devices`), or the profile was not created. Run `adb shell pm list users`: a line with the name `Google` must be there; if it is not, repeat item 2.
 
 **3. Start the profile and install the Google services into it (on the PC)**
 
@@ -268,7 +268,7 @@ GU=$(adb shell pm list users | grep -o '{[0-9]*:Google:' | tail -n 1 | tr -dc '0
 adb shell pm set-user-restriction --user $GU no_debugging_features 0
 ```
 
-Then repeat the block with `install-existing` and the check. This is based on the Android source code; I did not check it on your phone. If the command printed the same error, stop: then the prohibition can be lifted only through root, and the guide does not cover this case. Show the error in the chat from the header.
+Then repeat the block with `install-existing` and the check. This is based on the Android source code; I did not check it on your phone. If the command printed the same error, stop: then the prohibition can be lifted only through root, and the guide does not cover this case. Nothing has been removed from the phone yet; the empty profile can be deleted with the command from the “Rollback” section (the last block).
 
 **4. Sign in to the profile and to the Google account (on the phone)**
 
@@ -431,7 +431,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-The other lines will say “not on the phone or already removed, skipping”: this is normal, they are already removed. The `com.google.android.setupwizard` line should say `Success`; if it says `Failure`, show that line in full in the chat from the header. After the reboot the “Finish setting up your device” notification should be gone.
+The other lines will say “not on the phone or already removed, skipping”: this is normal, they are already removed. The `com.google.android.setupwizard` line should say `Success`; if it says `Failure`, the package could not be removed, and the notification will stay: leave it, the rest of the guide does not depend on it. Otherwise, after the reboot the “Finish setting up your device” notification should be gone.
 
 If after the reboot the notification remains, or the script wrote “not on the phone or already removed, skipping”, it is shown by another package. The list of packages that have notifications (on the PC):
 
@@ -439,7 +439,7 @@ If after the reboot the notification remains, or the script wrote “not on the 
 adb shell dumpsys notification | grep -o 'pkg=[^ ]*' | sort -u
 ```
 
-Find among them a package with the word `setup` in its name and show the output in the chat from the header.
+Find among them a package with the word `setup` in its name: most likely it shows the notification. If it is a Google or Moto package, add its line to `google.txt` in the same way and repeat the removal. If you cannot find such a package, leave the notification: it does not interfere with anything else.
 
 **3. Run the removal (on the PC)**
 
@@ -578,7 +578,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-If a line says `Failure: package is non-disable` instead of `Success`, the package is protected by the system. Skip it and show the whole output in the chat from the header: such packages need the same trick as Gboard in Step 6.
+If a line says `Failure: package is non-disable` instead of `Success`, the package is protected by the system. Skip it for now: the package stays on the phone, and nothing else breaks. Such packages can be removed only with the same trick as Gboard in Step 6. For Amazon App Manager and PayJoy it is written out in Step 6a, for other packages it is not.
 
 After the reboot, check on the phone:
 
@@ -662,7 +662,7 @@ After the reboot, check that the packages are removed (on the PC). The command s
 adb shell pm list packages --user 0 | grep -E 'com.motorola.aiservices|com.motorola.aicore'
 ```
 
-If something was printed, repeat the removal from the previous block and reboot the phone again with the pause. If a line says `Failure: package is non-disable` instead of `Success`, show the output in the chat from the header, as in item 4.
+If something was printed, repeat the removal from the previous block and reboot the phone again with the pause. If a line says `Failure: package is non-disable` instead of `Success`, skip this package, as in item 4.
 
 Check on the phone:
 
@@ -746,7 +746,7 @@ What is inside:
 
 **Smart Feed.** In May 2026, when Amazon was launched, this feed substituted an affiliate code. Motorola called it [unintended](https://www.androidcentral.com/phones/motorola/motorola-affiliate-codes-your-amazon-orders-states-this-was-unintended) and [fixed the settings](https://www.notebookcheck.net/Motorola-comments-on-the-debacle-surrounding-hijacked-shopping-apps.1308600.0.html). How the home screen behaves without the feed, I did not check: see item 6. If something is wrong with the home screen, bring back `com.motorola.smartfeed`.
 
-**PayJoy.** This is a lock client for a phone bought on installments. If the phone was not bought on installments, remove it. If it was, delete the line: what happens to the lock without the client, I did not check.
+**PayJoy.** This is a lock client for a phone bought on installments. The script will try to remove the package, but on the Razr Fold the system refuses with an error (what it looks like is in item 4 below), and the package stays on the phone until Step 6a, where it is removed in a different way.
 
 Six lines are disabled. Screenshot Editor (`screenshoteditor`: screenshot editing, long screenshots, GIFs) and “Secure folder” (`securevault`) were kept because of their functions: if you remove the second package, the files from the folder will become unavailable until you bring it back. Four packages with a question mark (`installer`, `appforecast`, `motosecurecore`, `securityhubext`) are disabled because I did not find out what they do. About `motosecurecore` it is only known that the Moto Secure package removed in Step 5 refers to it.
 
@@ -775,7 +775,7 @@ com.ertanto.kompas.official  # Kompas.com: a news app for Indonesia *
 it.rainet.android.rainews  # Rai News: news, a partner app for Italy *
 com.signatureclub.prod  # Signature Club: a partner app *
 com.zte.iptvclient.android.idmnc  # Vision+: television, a partner app for Indonesia *
-com.payjoy.access  # PayJoy: lock client for a phone bought on installments (if the phone was bought on installments, delete this line) *
+com.payjoy.access  # PayJoy: lock client for a phone bought on installments *
 com.ironsource.appcloud.oobe.hutchison  # ironSource Aura (Hutchison): app recommendations during setup *
 com.ironsrc.aura.tmo  # ironSource Aura (T-Mobile): app recommendations during setup *
 com.orange.aura.oobe  # ironSource Aura (Orange): app recommendations during setup *
@@ -852,7 +852,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-The answers are the same as in Step 4: `Success` means that the package is removed, “not on the phone or already removed, skipping” means that you do not have such a package. If you do not have the carrier list, the script will say that it did not find the file: this is normal. If a line says `Failure: package is non-disable` instead of `Success`, show the output in the chat from the header, as in item 4 of Step 5. The pause `sleep 20` and the normal reboot are needed for the same reason as in Step 4.
+The answers are the same as in Step 4: `Success` means that the package is removed, “not on the phone or already removed, skipping” means that you do not have such a package. If you do not have the carrier list, the script will say that it did not find the file: this is normal. If a line says `Failure: package is non-disable` instead of `Success`, skip this package, as in item 4 of Step 5. On the Razr Fold two lines come out like this. `com.amazon.appmanager` answers `Failure: package is non-disable`: Motorola protected it. `com.payjoy.access` prints a long error text (a Java trace) with the line `java.lang.IllegalArgumentException: Invalid argument`: the system does not allow removing it either. In both cases the package stays on the phone for now, and the script goes on to the next line. Both packages are removed in Step 6a; until then the check in item 5 prints them too. The pause `sleep 20` and the normal reboot are needed for the same reason as in Step 4.
 
 **5. Check that the packages are removed (on the PC)**
 
@@ -986,7 +986,7 @@ The pause and the normal reboot are here for the same reason as in Step 4.
 
 **If Gboard says `Failure: package is non-disable`**
 
-The package name is correct, the matter is Motorola's protection. [According to reports on XDA](https://xdaforums.com/t/uninstall-bloatware-with-adb.3948300/), on Moto phones every protected package is recorded as a separate file in the `nondisable` folder (usually `/product/etc/nondisable`). The partition is mounted read-only, so the file cannot be erased even with root. But it can be hidden from the system with a root module: the file stays in place, the system does not see it, and `pm` allows removing the package. [Modules that clean this folder](https://xdaforums.com/t/wireguard-kernel-module-for-xt2215-4-motorola-g-stylus-5g-2022.4535379/) have already been installed on other Moto phones. For APatch to attach module files to the system, it needs one more module, a metamodule: we install it in 5d. On the Razr Fold this worked: the file is in /product/etc/nondisable, the module together with the metamodule hid it, and Gboard was removed. Where the file is and what it is called on your phone now is shown by the command in 5b. If at any step the answer is not what is written, stop and show the output in the chat from the header.
+The package name is correct, the matter is Motorola's protection. [According to reports on XDA](https://xdaforums.com/t/uninstall-bloatware-with-adb.3948300/), on Moto phones every protected package is recorded as a separate file in the `nondisable` folder (usually `/product/etc/nondisable`). The partition is mounted read-only, so the file cannot be erased even with root. But it can be hidden from the system with a root module: the file stays in place, the system does not see it, and `pm` allows removing the package. [Modules that clean this folder](https://xdaforums.com/t/wireguard-kernel-module-for-xt2215-4-motorola-g-stylus-5g-2022.4535379/) have already been installed on other Moto phones. For APatch to attach module files to the system, it needs one more module, a metamodule: we install it in 5d. On the Razr Fold this worked: the file is in /product/etc/nondisable, the module together with the metamodule hid it, and Gboard was removed. Where the file is and what it is called on your phone now is shown by the command in 5b. If at any step the answer is not what is written, stop and do not go to the next one: until 5g nothing is removed, Gboard stays on the phone, and the module can be removed in APatch (APM → Remove).
 
 **5a. Check the screen lock (on the phone)**
 
@@ -1008,7 +1008,7 @@ The command goes through several partitions and runs for up to a minute:
 adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i inputmethod
 ```
 
-Expected answer: one line with a path, for example `/product/etc/nondisable/nondisable-com.google.android.inputmethod.latin.xml`. The file name on your phone may differ, but most likely it contains `inputmethod.latin`. If nothing is printed, stop: run the same command without `| grep -i inputmethod` and show the whole output in the chat from the header. That means the protection is arranged differently, and the steps below will not fit.
+Expected answer: one line with a path, for example `/product/etc/nondisable/nondisable-com.google.android.inputmethod.latin.xml`. The file name on your phone may differ, but most likely it contains `inputmethod.latin`. If nothing is printed, stop. Run the same command without `| grep -i inputmethod`: it prints all the protection files. If there is a file for Gboard with a different name, put its mask into the `PATTERN` line in 5c. If there is none, the protection is arranged differently, the steps below will not fit, and Gboard stays on the phone.
 
 **5c. Build the module (on the PC)**
 
@@ -1076,7 +1076,7 @@ adb push magic_mount_rs-arm64.zip /sdcard/Download/
 
 If `curl` prints an error (for example, 404), open the [releases page](https://github.com/Tools-cx-app/meta-magic_mount-rs/releases/latest) in a browser, download the file whose name ends with `-arm64.zip` (in the Assets block, not “Source code”) and put it into the Download folder on the phone.
 
-Install it (on the phone): APatch → the APM tab → the install button → choose this zip in the Download folder. If a line starting with `!` appears in the log, stop and show the log in the chat from the header. After the installation, reboot the phone right away (with the button in the log or with the command `adb shell svc power reboot` on the PC): [APatch requires a reboot](https://apatch.dev/meta-module.html) after a metamodule, before installing other modules.
+Install it (on the phone): APatch → the APM tab → the install button → choose this zip in the Download folder. If a line starting with `!` appears in the log, the metamodule was not installed: put the file on the phone again and repeat the installation. If the same line appears again, stop: without the metamodule the next steps do not work, and Gboard stays on the phone. After the installation, reboot the phone right away (with the button in the log or with the command `adb shell svc power reboot` on the PC): [APatch requires a reboot](https://apatch.dev/meta-module.html) after a metamodule, before installing other modules.
 
 When the phone has booted, open APM: the red notice should be gone. Then 5e. If Unprotect Gboard was already installed before the metamodule, in 5e first remove it and reboot the phone.
 
@@ -1084,7 +1084,7 @@ When the phone has booted, open APM: the red notice should be gone. Then 5e. If 
 
 If the module is already in the APM list and Gboard is not yet removed, first remove the module (APM → Remove) and reboot the phone. A module installed before the metamodule is not attached: on the Razr Fold only a reinstall helped. Then open the APatch app and go to the APM tab (APatch modules; the KPM tab does not fit for this). Tap the install button and choose `unprotect-gboard.zip` in the Download folder (Downloads). In the installation log a line `- Hiding marker:` with the path from 5b should appear. Then reboot the phone: with the button in the log or with the command `adb shell svc power reboot` on the PC.
 
-If instead the log says `! No marker file matches`, the module did not install. This is by design: it does not install when there is nothing to hide. Show the output from 5b in the chat from the header.
+If instead the log says `! No marker file matches`, the module did not install. This is by design: it does not install when there is nothing to hide. Go back to 5b: the file name there must fit the `PATTERN` mask in 5c. If the file has a different name, put its mask into the `PATTERN` line, repeat 5c and install the module again.
 
 **5f. Check that the file is hidden (on the PC)**
 
@@ -1094,7 +1094,7 @@ After the reboot make sure that `adb devices` shows `device`, and repeat the com
 adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i inputmethod
 ```
 
-Now the output should be empty. If the Gboard line remains, the module did not take effect: do not go to 5g. First look in APM: if there is still the red notice about the metamodule, repeat 5d. If there is no notice, most likely the module was installed before the metamodule (on the Razr Fold the line remained exactly because of this). Remove the module (APM → Remove), reboot the phone, install the module again (5e), reboot once more and repeat this check. If the line still remains, show in the chat from the header a screenshot of APM and the output of the command.
+Now the output should be empty. If the Gboard line remains, the module did not take effect: do not go to 5g. First look in APM: if there is still the red notice about the metamodule, repeat 5d. If there is no notice, most likely the module was installed before the metamodule (on the Razr Fold the line remained exactly because of this). Remove the module (APM → Remove), reboot the phone, install the module again (5e), reboot once more and repeat this check. If the line still remains, do not go to 5g: the module does not work on your firmware, and Gboard stays on the phone. Remove the module (APM → Remove) and reboot the phone.
 
 **5g. Remove Gboard (on the PC)**
 
@@ -1104,9 +1104,9 @@ sleep 20
 adb shell svc power reboot
 ```
 
-The `com.google.android.inputmethod.latin` line should now say `Success`, and the already removed packages answer “not on the phone or already removed”. After the reboot open any input field: the new keyboard should appear. If there is no keyboard at all, bring Gboard back with the command `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin`, wait 20 seconds, reboot the phone with the command `adb shell svc power reboot` and show in the chat from the header the output of the command `adb shell settings get secure default_input_method`.
+The `com.google.android.inputmethod.latin` line should now say `Success`, and the already removed packages answer “not on the phone or already removed”. After the reboot open any input field: the new keyboard should appear. If there is no keyboard at all, bring Gboard back with the command `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin`, wait 20 seconds, reboot the phone with the command `adb shell svc power reboot` and go back to items 3 and 4 of this step: the new keyboard must be turned on and be the main one, and the command `adb shell settings get secure default_input_method` must name it. Only then repeat 5g.
 
-**About the module.** While Gboard is removed, do not delete or turn off either the module or the metamodule: without the metamodule the module does not work, and I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. If after a firmware update Gboard again says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, the file was named differently in the new firmware: repeat 5b–5f. If `non-disable` is reported by some other package, show the output in the chat from the header: the module is fixed with a one-line change.
+**About the module.** While Gboard is removed, do not delete or turn off either the module or the metamodule: without the metamodule the module does not work, and I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. If after a firmware update Gboard again says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, the file was named differently in the new firmware: repeat 5b–5f. If `non-disable` is reported by some other package, leave that package on the phone: the module from this step hides only the Gboard file. For Amazon App Manager and PayJoy see Step 6a. For any other package the `PATTERN` line from 5c would have to be changed, and this case is not covered here.
 
 **If the phone did not boot after installing the module or the metamodule.** This is unlikely: the module hides one file, and the metamodule only attaches module files. But if it did happen, turn on the APatch Safe mode: all modules are turned off in it, and in APM the “Remove” button works: remove what you installed last (the metamodule or the module). [APatch instructions](https://apatch.dev/rescue-bootloop.html): hold the power button until the screen lights up, then press and release it until the first screen appears. The heading of that page also mentions the volume “down” button, the number of presses is not specified, so the method may take several attempts. If it did not work, follow the section “If the phone does not boot” at the end.
 
@@ -1131,6 +1131,172 @@ adb shell cmd package install-existing --user 0 com.google.android.dialer
 ```
 
 A restored dialer should not interfere: while Fossify Phone is the default dialer, ordinary calls go through it, and the system one is needed only for the emergency call. This is from my knowledge and was not checked on your phone.
+
+## Step 6a. Two more protected packages: Amazon App Manager and PayJoy
+
+After Step 5a two packages from `moto-more.txt` stay on the phone: `com.amazon.appmanager` (the answer is `Failure: package is non-disable`) and `com.payjoy.access` (a long Java error with the line `IllegalArgumentException: Invalid argument`). They are protected in two different ways, so each one gets its own module. Both modules work only through the metamodule: if you have not installed it yet, do 5d first and then come back here. The steps repeat the ones from Step 6: build the module, install it, reboot, check. Checked on the Razr Fold: after the first module and a reboot the line `com.amazon.appmanager` answered `Success`, and after the second module and a reboot PayJoy disappeared from the package list of the main profile.
+
+If at any step the answer is not what is written, stop and do not go to the next one: the modules delete nothing, and a module can be removed in APatch (APM → Remove).
+
+**6a-1. Amazon App Manager: find the protection file (on the PC)**
+
+The protection is the same as for Gboard: in the `nondisable` folder there is a file named after the package. Look for it:
+
+```
+adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i amazon
+```
+
+Expected answer: one line with a path. On the Razr Fold it is `/product/etc/nondisable/com.amazon.appmanager.mdip.xml`. The name differs from the Gboard one (there is no `nondisable-` at the start), so the module takes the file by the package name. If nothing is printed, stop: either you do not have this package, or it is not protected by a file on your phone, and the steps below do not fit.
+
+**6a-2. Amazon App Manager: build the module (on the PC)**
+
+The code is the same as in 5c, only the mask and the names are different. Copy the block whole:
+
+```
+cd ~/razr-debloat
+mkdir -p amazon-module
+cd amazon-module
+cat > module.prop <<'EOF'
+id=unprotect_amazon
+name=Unprotect Amazon App Manager (Motorola nondisable)
+version=1.0
+versionCode=1
+author=local
+description=Hides the Motorola nondisable marker of Amazon App Manager so that pm uninstall --user 0 works
+EOF
+cat > customize.sh <<'EOF'
+# Hides the Motorola protection files (nondisable) from the system. Deletes nothing.
+# PATTERN: a file name mask. '*com.amazon.appmanager*' means Amazon App Manager.
+PATTERN='*com.amazon.appmanager*'
+
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  if [ "$PART" = system ]; then
+    SRC=/system/etc/nondisable
+    DST=$MODPATH/system/etc/nondisable
+  else
+    SRC=/$PART/etc/nondisable
+    DST=$MODPATH/system/$PART/etc/nondisable
+  fi
+  [ -d "$SRC" ] || continue
+  for F in "$SRC"/$PATTERN; do
+    [ -e "$F" ] || continue
+    mkdir -p "$DST"
+    mknod "$DST/${F##*/}" c 0 0
+    ui_print "- Hiding marker: $F"
+    FOUND=1
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No marker file matches $PATTERN in /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../unprotect-amazon.zip module.prop customize.sh
+cd ..
+adb push unprotect-amazon.zip /sdcard/Download/
+```
+
+If `python3` is not found, replace the line with it by `zip ../unprotect-amazon.zip module.prop customize.sh`.
+
+**6a-3. Amazon App Manager: install the module and remove the package**
+
+On the phone: APatch → APM → the install button → choose `unprotect-amazon.zip` in the Download folder. In the installation log a line `- Hiding marker:` with the path from 6a-1 should appear. If instead the log says `! No marker file matches`, the module did not install: this is by design, there is nothing to hide, go back to 6a-1. Then reboot the phone: with the button in the log or with the command `adb shell svc power reboot` on the PC.
+
+After the reboot repeat the command from 6a-1 (on the PC): now the output must be empty. If the line remains, the module did not take effect: check the same things as in 5f (the red notice about the metamodule in APM, a module installed before the metamodule). If the output is empty, remove the package:
+
+```
+./debloat.sh remove moto-more.txt
+sleep 20
+adb shell svc power reboot
+```
+
+The line `com.amazon.appmanager` should now say `Success` (on the Razr Fold it did), and the already removed packages answer “not on the phone or already removed, skipping”. The line `com.payjoy.access` still gives the Java error: this is expected, it is dealt with below.
+
+**6a-4. PayJoy: why this is different (on the PC)**
+
+With PayJoy, hiding the protection file does not help. On my phone the first module also hid its file (`/product/etc/nondisable/com.payjoy.access.xml`), and the error stayed: every `pm` command with the name of this package fails with the same `IllegalArgumentException: Invalid argument`, even `pm path`, which only reads, both from adb and as root. The word “payjoy” is found in the system framework files themselves (`framework.jar`, `moto-core_services.jar`, `framework-res.apk` and a separate library `payjoy-api`), so I think the name is checked by the firmware code; I did not look for the exact place. The overlay `com.motorola.android.overlay.payjoy` has no relation to this: it holds only one array, `config_payjoy_channellist`, and the system does not allow turning it off. At the same time the system keeps the package turned off itself: `dumpsys package com.payjoy.access` showed `enabled=2` (“turned off”) in all three profiles of the Razr Fold, so before the removal it did not work either.
+
+Since `pm` does not accept the name, we do not use `pm`. The second module hides the app folder of the package, `/product/priv-app/PayJoyAccess`. The [KernelSU documentation](https://kernelsu.org/guide/module.html) describes this way of removing a file or a folder from the system with a module (`mknod … c 0 0`); on the Razr Fold it worked with the metamodule from 5d. At the next boot Android does not find the app and drops the package. Nothing is deleted: the files stay on the partition, and the module masks them only while it is installed.
+
+Look at what you have:
+
+```
+adb shell pm list packages -f | grep -i payjoy
+```
+
+On the Razr Fold it prints two lines: `package:/product/priv-app/PayJoyAccess/PayJoyAccess.apk=com.payjoy.access` and the overlay `package:/product/overlay/MotoFrameworkResOverlayPayjoy.apk=com.motorola.android.overlay.payjoy`. If there is no line with the app itself (`.../priv-app/...apk`), it is not on your phone: skip 6a-5 and 6a-6.
+
+**6a-5. PayJoy: build the module (on the PC)**
+
+The `customize.sh` of this module looks in `priv-app` and `app` of the partitions for a folder with “payjoy” in its name (in any letter case), so you do not need to put a name into it. Copy the block whole:
+
+```
+cd ~/razr-debloat
+mkdir -p payjoy-module
+cd payjoy-module
+cat > module.prop <<'EOF'
+id=hide_payjoy_app
+name=Hide PayJoy Access app (Motorola)
+version=1.0
+versionCode=1
+author=local
+description=Hides the PayJoy Access system app folder so that Android drops the package at boot
+EOF
+cat > customize.sh <<'EOF'
+# Hides the system app folder of PayJoy Access from Android. Deletes nothing:
+# the files stay on the partition, the module only masks them while it is active.
+# At the next boot the package manager does not find the app and drops the package.
+# The name check is case-insensitive and looks for "payjoy" in the folder name.
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  for SUB in priv-app app; do
+    if [ "$PART" = system ]; then
+      SRC=/system/$SUB
+      DST=$MODPATH/system/$SUB
+    else
+      SRC=/$PART/$SUB
+      DST=$MODPATH/system/$PART/$SUB
+    fi
+    [ -d "$SRC" ] || continue
+    for D in "$SRC"/*; do
+      [ -d "$D" ] || continue
+      case "${D##*/}" in
+        *[Pp][Aa][Yy][Jj][Oo][Yy]*)
+          mkdir -p "$DST"
+          mknod "$DST/${D##*/}" c 0 0
+          [ -c "$DST/${D##*/}" ] || abort "! mknod failed for $DST/${D##*/}"
+          ui_print "- Hiding app folder: $D"
+          FOUND=1
+          ;;
+      esac
+    done
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No PayJoy folder in priv-app or app of /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../hide-payjoy.zip module.prop customize.sh
+cd ..
+adb push hide-payjoy.zip /sdcard/Download/
+```
+
+If `python3` is not found, replace the line with it by `zip ../hide-payjoy.zip module.prop customize.sh`.
+
+**6a-6. PayJoy: install the module and check**
+
+Install it the same way as in 6a-3 (on the phone): APatch → APM → the install button → `hide-payjoy.zip` in the Download folder. In the log a line `- Hiding app folder:` with the path should appear. If the log says `! No PayJoy folder`, the module did not install: there is nothing to hide on your phone. Then reboot the phone: with the button in the log or with the command `adb shell svc power reboot` on the PC.
+
+After the reboot check (on the PC):
+
+```
+adb shell pm list packages --user 0 | grep -i payjoy
+adb shell "ls /product/priv-app | grep -i payjoy"
+```
+
+The first command should print only `package:com.motorola.android.overlay.payjoy`, the second nothing. The overlay stays: it is a resource without code, and the removal script does not touch overlays. If the package of the app is still in the list, the module did not take effect: look in APM (the red notice about the metamodule must not be there, the module must be in the list and enabled), repeat the installation and the reboot. If it still stays, remove the module (APM → Remove) and reboot the phone: PayJoy stays on it, turned off by the system.
+
+**About the two modules.** While the packages are removed, do not delete or turn off these modules or the metamodule. For Amazon App Manager the reason is the same as for Gboard: I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. PayJoy simply comes back together with its folder when its module is removed. I checked only the Razr Fold: the phone booted normally after both modules, and how other firmware versions react to the missing PayJoy package I do not know. What to do after a system update is written in Step 10. If the phone did not boot after installing a module, turn on the APatch Safe mode as described in Step 6 (“If the phone did not boot after installing the module or the metamodule”) and remove the module you installed last.
 
 ## Step 7. Remove Google services from the main profile
 
@@ -1175,7 +1341,7 @@ If after Steps 4–6 the phone works without failures, go on. If not, deal with 
 
 The order of lines matters: Google Play services are removed last.
 
-If a line gets the answer `Failure: package is non-disable`, stop and show the whole output in the chat from the header. The module from Step 6 is set up only for Gboard, and it would have to be redone for these packages. On the Razr Fold they have no protection: all five answered Success.
+If a line gets the answer `Failure: package is non-disable`, stop: this package stays on the phone, and nothing else breaks. The module from Step 6 is set up only for Gboard, and it would have to be redone for these packages. On the Razr Fold they have no protection: all five answered Success.
 
 ```
 cat > gms.txt <<'EOF'
@@ -1199,7 +1365,7 @@ Wait two minutes after booting. Then check on the PC that what was removed has n
 adb shell pm list packages --user 0 | grep -E 'package:(com.android.vending|com.google.android.gsf|com.google.android.gms)'
 ```
 
-The command should print nothing (the `overlay.gmsconfig` lines do not match here: they are not apps). On the Razr Fold, after the pause and the normal reboot, the output was empty. If something was printed, what was removed has come back: repeat item 4 without skipping the pause, and show the output in the chat from the header. If everything is clean, go through the checklist from Step 8. If “app has stopped” messages keep popping up, bring the services back with the command `./debloat.sh restore gms.txt`, wait 20 seconds, reboot the phone with the command `adb shell svc power reboot` and write down the name of the app that was in the message.
+The command should print nothing (the `overlay.gmsconfig` lines do not match here: they are not apps). On the Razr Fold, after the pause and the normal reboot, the output was empty. If something was printed, what was removed has come back: repeat item 4 without skipping the pause, and check again after the reboot. If the packages come back again, stop: the removal does not hold on your firmware, and the phone keeps working with them. If everything is clean, go through the checklist from Step 8. If “app has stopped” messages keep popping up, bring the services back with the command `./debloat.sh restore gms.txt`, wait 20 seconds, reboot the phone with the command `adb shell svc power reboot` and write down the name of the app from the message: it depends on Google services, so run it in the “Google” profile.
 
 ## Step 8. Check that the phone works
 
@@ -1217,7 +1383,7 @@ Go through this checklist after a reboot: if even one item does not work, go to 
 | NFC | Turn NFC on and off in the shade or in Settings | The switch works |
 | Unlock | Lock and unlock the phone with a fingerprint or face | Unlocking works |
 | Camera | Take a photo and a video, open a shot from the thumbnail | The shot opens in Fossify Gallery |
-| Camera internet | If you did Step 12: read the log from item 7 of that step | The log has the lines “com.motorola.camera5: block sent” (and the same for the other packages from block-net.list) and “done”, and there is no error text (an error is allowed only for the line with get-package-networking-enabled) |
+| Camera internet | If you did Step 12: read the log from item 7 of that step | The log has the lines “chain3: ok”, “com.motorola.camera5: block sent” and “check: com.motorola.camera5:deny” (the same for the other packages from block-net.list) and “done”, and there are no lines with the word “error” (an error text is allowed only in the “check:” line) |
 | Folding and the outer display | Fold and unfold the phone, open an app on the outer display | The screens switch without failures |
 | Sound | Play music or a video, open Settings → Sound | Sound plays, the “Sound” section opens |
 | Stylus | If you removed the stylus (item 5 in Step 5): check the stylus connection, draw a line with pressure, press the side button | The stylus is connected, pressure and the side button work |
@@ -1381,6 +1547,8 @@ For now we skip updates. When you get to them, take the following into account.
 
 **The Gboard protection module and the metamodule.** They are in `/data/adb/modules`, a system update does not touch `/data`, but the module works only while APatch is active, that is, after the boot is patched again. If when running the lists again Gboard says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, repeat 5b–5f from Step 6.
 
+**The modules from Step 6a.** They are in `/data/adb/modules` too and work under the same condition: only while APatch is active. If when running the lists again `com.amazon.appmanager` says `non-disable` or `com.payjoy.access` prints the Java error, the package has come back: open APatch → APM and check that the red notice about the metamodule is not there (if it is, repeat 5d) and that both modules are in the list and enabled. If everything is in place and the package is back anyway, the file or the folder was named differently in the new firmware: remove the module of that package (APM → Remove), reboot the phone and repeat its steps from Step 6a. I did not check this after a system update.
+
 ## Step 11. The Shelter work profile: remove Moto and Google junk, as in the main profile
 
 The commands of Steps 4–7 remove apps only in the main profile: they all have `--user 0`. The work profile that Shelter creates is a separate user of the phone with its own list of hidden apps, and Moto and Google appear in it again. This step removes there the same things we removed in the main profile: the Google apps (`google.txt`), Moto junk (`moto.txt`, `moto-extra.txt`, `moto-ai.txt`), the Google versions from `google-roles.txt`, the Google dialer, Moto Notes and the Google services from `gms.txt` (Play Store, Services Framework, Google Play services) and the leftovers from Step 5a (`google-more.txt`, `moto-more.txt`, `carriers.txt`).
@@ -1429,7 +1597,7 @@ For each removed package “removed: …” will be printed. The script silently
 comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort) | grep -E 'google|motorola'
 ```
 
-The command shows the Google and Moto packages that are in the work profile but are no longer in the main one. It should print nothing. If something was printed, show the output in the chat from the header. Do not touch other Google system packages in the profile, for example `com.google.android.permissioncontroller` or `com.google.android.webview`. Then reboot the phone with the pause (item 6).
+The command shows the Google and Moto packages that are in the work profile but are no longer in the main one. It should print nothing. If something was printed, the script did not remove those packages: the system did not let it, or they were not in your lists. Leave them, the profile works with them. To see the reason, remove one package by hand (on the phone, in Termux): `su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`, with your profile number and the package name; the answer `Failure` will show the reason. Do not touch other Google system packages in the profile, for example `com.google.android.permissioncontroller` or `com.google.android.webview`. Then reboot the phone with the pause (item 6).
 
 **6. Reboot the phone with the pause (on the PC)**
 
@@ -1456,7 +1624,7 @@ The regular camera `com.motorola.camera5` cannot be removed: without it the phon
 
 **How it works.** Android has a system-level network ban for an individual app: it does not use a VPN and does not need extra apps. It is controlled by the `cmd connectivity` commands. According to the description of the ShizuWall app, which uses the same mechanism, these commands work on Android 11 and newer, and the rules are reset at every reboot. So after the check we will put a small script on the phone: APatch runs it at every boot and turns the ban on again. The script lives in the `/data/adb/service.d` folder, and a system update or reflashing the boot image does not erase it.
 
-Do this step after Steps 1–10. You need Termux with root, as in Step 11. I did not check these commands on your Razr Fold, so first check the ban on Termux (item 3) and only then block the network for the camera.
+Do this step after Steps 1–10. You need Termux with root, as in Step 11. The commands of this step were run on the Razr Fold; what exactly was checked and what was not is written at the end of the step. Even so, first check the ban on Termux (item 3) and only then block the network for the camera: this is how you will see that the ban really cuts the network on your firmware.
 
 **1. Check that the phone knows these commands (on the PC)**
 
@@ -1464,7 +1632,7 @@ Do this step after Steps 1–10. You need Termux with root, as in Step 11. I did
 adb shell cmd connectivity help | grep -iE 'chain3|package-networking'
 ```
 
-Lines with the words `set-chain3-enabled` and `set-package-networking-enabled` should be printed (there may also be lines with `get-` next to them). If nothing was printed, this firmware does not have such commands: stop and show the output of the `adb shell cmd connectivity help` command in the chat from the header, where they will suggest a fallback method.
+Lines with the words `set-chain3-enabled` and `set-package-networking-enabled` should be printed (there may also be lines with `get-` next to them). If nothing was printed, this firmware does not have such commands: skip Step 12 and Step 12a, because this guide has no other way to close the internet for an app. The rest of the guide does not depend on them.
 
 **2. Find out whether the camera shares its number with other apps (on the PC)**
 
@@ -1474,25 +1642,26 @@ Android cuts the network by the app number (uid), not by the package name. If ot
 U=$(adb shell pm list packages -U --user 0 | tr -d '\r' | sed -n 's/^package:com\.motorola\.camera5 uid:\([0-9]*\)$/\1/p'); echo "camera number: $U"; adb shell pm list packages -U --user 0 | tr -d '\r' | grep " uid:$U\$"
 ```
 
-The first line will show a number of 10000 or more, and under it there will be exactly one line `package:com.motorola.camera5 uid:…`. If the number is empty, there is no such package on the phone: show the output of the command `adb shell pm list packages --user 0 | grep camera` in the chat from the header. If there are several lines under the number or it is less than 10000, stop and show the output in the chat from the header.
+The first line will show a number of 10000 or more, and under it there will be exactly one line `package:com.motorola.camera5 uid:…`. If the number is empty, there is no package with this name on the phone. The command `adb shell pm list packages --user 0 | grep camera` will show how the camera is called on your phone. Use that name instead of `com.motorola.camera5` in this step and repeat this item. If there are several lines under the number or it is less than 10000, stop: the ban would cut the network for other packages or for the system itself, so leave the camera with its internet access and skip the rest of Step 12 and Step 12a.
 
 **3. Check the ban on Termux (on the phone and on the PC)**
 
-First check the ban not on the camera but on Termux: that shows whether it works on your firmware. Make sure Termux has network access (on the phone, in Termux):
+First check the ban not on the camera but on Termux: that shows whether it works on your firmware. Update Termux first: with outdated packages `curl` may fail with an error that mentions `SSL_set_quic_tls_early_data_enabled` (this happened on the Razr Fold, and the update fixed it). If Termux asks a question during the update, just press Enter. Then make sure Termux has network access (on the phone, in Termux):
 
 ```
+pkg update && pkg upgrade -y
 pkg install -y curl
 curl -sS -m 5 -I https://example.com
 ```
 
-Response headers should be printed, and the first line starts with `HTTP/`. Block Termux's network (on the PC):
+Response headers should be printed, and the first line starts with `HTTP/`. Block Termux's network (on the PC). The first command prints nothing, and the second prints a line like `Disabled networking for com.termux, appId …`:
 
 ```
 adb shell cmd connectivity set-chain3-enabled true
 adb shell cmd connectivity set-package-networking-enabled false com.termux
 ```
 
-Repeat `curl -sS -m 5 -I https://example.com` in Termux (on the phone): now it should end with an error, for example `Could not resolve host` or `timed out`. If curl printed the headers again, the ban does not work on your firmware: stop and show the output in the chat from the header. If everything is as described, give Termux its network back (on the PC):
+Repeat `curl -sS -m 5 -I https://example.com` in Termux (on the phone): now it should end with an error, for example `Could not resolve host` or `timed out`. If curl printed the headers again, the ban does not work on your firmware: after the next command skip the rest of Step 12 and Step 12a. In any case give Termux its network back (on the PC); the answer is a line like `Enabled networking for com.termux, appId …`:
 
 ```
 adb shell cmd connectivity set-package-networking-enabled true com.termux
@@ -1505,7 +1674,7 @@ adb shell cmd connectivity set-chain3-enabled true
 adb shell cmd connectivity set-package-networking-enabled false com.motorola.camera5
 ```
 
-The commands print nothing. Open the camera and shoot a photo and a video: shooting should work as before. If the camera does not open or the internet disappeared on the whole phone, reboot the phone with the command `adb shell svc power reboot`: the rules will be reset. Then describe in the chat from the header what happened. If the help output from item 1 had the line `get-package-networking-enabled`, you can check the ban: the answer for the camera should differ from the answer for an ordinary app, for example for `com.android.settings`:
+The first command prints nothing, and the second prints a line like `Disabled networking for com.motorola.camera5, appId 10270` (the number may differ, but it is 10000 or more): this is how the system confirms the ban. Open the camera and shoot a photo and a video: shooting should work as before. If the camera does not open or the internet disappeared on the whole phone, reboot the phone with the command `adb shell svc power reboot`: the rules will be reset. Then do not go further: leave the camera with its internet access and skip the rest of Step 12 and Step 12a. If the help output from item 1 had the line `get-package-networking-enabled`, you can check the ban: the camera should answer `com.motorola.camera5:deny`, and an ordinary app, for example `com.android.settings`, should answer `com.android.settings:allow`:
 
 ```
 adb shell cmd connectivity get-package-networking-enabled com.motorola.camera5
@@ -1537,17 +1706,28 @@ n=0
 until [ "$(getprop sys.boot_completed)" = "1" ] || [ "$n" -ge 150 ]; do sleep 2; n=$((n+1)); done
 sleep 15
 echo "start: $(date)"
-cmd connectivity set-chain3-enabled true </dev/null
+echo "context: $(id -Z 2>/dev/null)"
+# The output of cmd is discarded: when it was written to the log, the calls failed
+# with "Failed transaction". The result is taken from the exit code.
+# On an error the call is repeated up to 12 times.
+run() {
+  i=0
+  while [ "$i" -lt 12 ]; do
+    cmd connectivity "$@" </dev/null >/dev/null 2>&1 && return 0
+    i=$((i+1)); sleep 5
+  done
+  return 1
+}
+if run set-chain3-enabled true; then echo "chain3: ok"; else echo "chain3: error"; fi
 grep -Ev '^[[:space:]]*(#|$)' "$LIST" | tr -d '\r' | while read -r pkg _; do
-  cmd connectivity set-package-networking-enabled false "$pkg" </dev/null
-  echo "$pkg: block sent"
-  cmd connectivity get-package-networking-enabled "$pkg" </dev/null
+  if run set-package-networking-enabled false "$pkg"; then echo "$pkg: block sent"; else echo "$pkg: error"; fi
+  echo "check: $(cmd connectivity get-package-networking-enabled "$pkg" </dev/null 2>&1)"
 done
 echo "done"
 EOF
 ```
 
-The script waits for the end of the boot and 15 more seconds, turns on the general switch and blocks the network for every package in the list. It writes the result to `/data/adb/block-net.log`. The line with `get-package-networking-enabled` is needed only for the log: if your firmware does not have such a command, the log will show an error on that line, but the ban will still work.
+The script waits for the end of the boot and 15 more seconds, turns on the general switch and blocks the network for every package in the list. If the system does not accept a command, the script repeats it up to 12 times with a pause of 5 seconds. It writes the result to `/data/adb/block-net.log`: the date, the system context, the result of every command and, for every package, the line `check:` with the state of the ban that the system reports. The `check:` line is needed only for the log: if your firmware does not have the command `get-package-networking-enabled`, the log will show an error on that line, but the ban will still work.
 
 **6. Put the files on the phone (on the PC and on the phone)**
 
@@ -1564,7 +1744,7 @@ Install them (on the phone, in Termux):
 su -c 'mkdir -p /data/adb/service.d && cp /data/local/tmp/block-net.sh /data/adb/service.d/block-net.sh && chmod 755 /data/adb/service.d/block-net.sh && cp /data/local/tmp/block-net.list /data/adb/block-net.list && chmod 644 /data/adb/block-net.list && echo done'
 ```
 
-“done” should be printed. If not, show the entire output in the chat from the header.
+“done” should be printed. If not, one of the commands failed, and the error text says which one: most often Termux has no root (turn it on as in Step 9, item 1) or the `adb push` commands from the previous block did not copy the files. Fix that and repeat the command.
 
 **7. Reboot the phone and check the log (on the PC and on the phone)**
 
@@ -1580,7 +1760,7 @@ Unlock the phone, wait a minute and read the log (on the phone, in Termux):
 su -c 'cat /data/adb/block-net.log'
 ```
 
-The log should contain the line `start:` with a date, then `com.motorola.camera5: block sent`, the answer to `get-package-networking-enabled` and, at the end, `done`. If the file is missing or empty, APatch did not run the script: check the permissions with the command `su -c 'ls -l /data/adb/service.d/block-net.sh'` (the line should start with `-rwxr-xr-x`) and show the output in the chat from the header. If the log has an error, for example `Unknown command`, show the whole log in the chat from the header. Then go through the checklist from Step 8.
+The log should contain the line `start:` with a date, the line `context:` (on the Razr Fold it is `u:r:magisk:s0`; another value is not a problem), then `chain3: ok`, `com.motorola.camera5: block sent`, `check: com.motorola.camera5:deny` and, at the end, `done`. If the file is missing or empty, APatch did not run the script: check the permissions with the command `su -c 'ls -l /data/adb/service.d/block-net.sh'` (the line should start with `-rwxr-xr-x`). If the permissions are different or the script file is not there, repeat item 6. If they are right and the log is still empty, APatch did not start the script at boot: the ban will not be permanent, so repeat the commands from item 4 after every reboot (or remove the ban as in item 8). If the log has `chain3: error` or the line `com.motorola.camera5: error` instead of `com.motorola.camera5: block sent`, or the `check:` line says `allow`, the ban is not in effect: remove the script with the second command from item 8 and skip Step 12a. If only the `check:` line shows an error text, while `chain3: ok` and `block sent` are present, most likely your firmware does not have the command `get-package-networking-enabled`, and the ban is in effect. Then go through the checklist from Step 8.
 
 **8. How to remove the ban (on the PC and on the phone)**
 
@@ -1596,9 +1776,9 @@ So that the ban does not turn on again at the next boot (on the phone, in Termux
 su -c 'rm /data/adb/service.d/block-net.sh'
 ```
 
-**System updates and kernel changes.** The script and the list live in `/data/adb`, so a system update, reflashing the boot image and replacing the kernel do not affect them while APatch is working on the phone. While root has not come back (for example, between the update and the repeated flashing of boot from Step 10), the camera's internet is not closed. As far as I know, the rule is stored in the system BPF tables, not in kernel modules like netfilter, so a custom kernel for Droidspaces should not break it; this is my assumption, not a check. After an update or a kernel change repeat item 7, and after a kernel change also the Termux check from item 3: the log shows only that the command was sent, not that the ban is in effect.
+**System updates and kernel changes.** The script and the list live in `/data/adb`, so a system update, reflashing the boot image and replacing the kernel do not affect them while APatch is working on the phone. While root has not come back (for example, between the update and the repeated flashing of boot from Step 10), the camera's internet is not closed. As far as I know, the rule is stored in the system BPF tables, not in kernel modules like netfilter, so a custom kernel for Droidspaces should not break it; this is my assumption, not a check. After an update or a kernel change repeat item 7, and after a kernel change also the Termux check from item 3: the log shows that the system accepted the ban, not that the network is really cut.
 
-**What I did not check on your phone.** The `cmd connectivity` commands themselves on this firmware, running the script from `service.d` under APatch, and whether the ban survives an update. That is why items 3 and 7 are mandatory. The ban applies only to the main profile: it does not affect the cameras in the “Google” profile and in the Shelter work profile, if they exist there.
+**What is checked and what is not.** Checked on the Razr Fold: the commands from item 4 are accepted and answer as described there; after the ban, `get-package-networking-enabled` for the camera answers `com.motorola.camera5:deny`; APatch starts the script from `service.d` at boot, and the log of the final version of the script looks like in item 7. Not checked: whether the ban survives a system update and a kernel replacement. That is why items 3 and 7 are mandatory. The ban applies only to the main profile: it does not affect the cameras in the “Google” profile and in the Shelter work profile, if they exist there.
 
 ## Step 12a. Which of the remaining packages can still reach the internet
 
@@ -1702,7 +1882,7 @@ diff <(cut -d' ' -f3 audit_internet_before.txt) <(cut -d' ' -f3 audit_internet.t
 
 Lines starting with `>` appeared after the update: sort them out using the table above. Closing the network works through a script in `/data/adb`, not through the removal lists, so it does not bring back anything that was removed. After a kernel change, check the ban again: items 3 and 7 of Step 12.
 
-**What I did not check.** I ran this step's commands only against sample `pm` and `dumpsys` output; they were not run on the Razr Fold itself. The Bayton data comes from other models. The INTERNET permission shows a possibility, not the fact of sending: only a network monitor or a firewall with a connection log can prove that a package sends nothing or catch the sending, and that is not part of this guide.
+**What is checked and what is not.** The command that closes a package's network is the same as in Step 12, and it was checked on the Razr Fold (see the end of Step 12). The commands of this step that look for packages and their permissions I ran only against sample `pm` and `dumpsys` output; they were not run on the Razr Fold itself. The Bayton data comes from other models. The INTERNET permission shows a possibility, not the fact of sending: only a network monitor or a firewall with a connection log can prove that a package sends nothing or catch the sending, and that is not part of this guide.
 
 ## Rollback: if something broke
 
@@ -1743,6 +1923,10 @@ adb shell svc power reboot
 ```
 
 If you also want to remove the protection module from Step 6, first bring Gboard back with this command, then remove the module: APatch → APM → Remove, and reboot the phone. I did not check what the system does with an already removed package when its protection comes back, so this is the order. It is better to leave the metamodule in place: without it, the files of the other modules will stop being attached too.
+
+**Bring back Amazon App Manager and PayJoy (on the PC and on the phone)**
+
+Amazon App Manager is brought back with the command from the “Bring back a single package” section: substitute `com.amazon.appmanager` for `com.example.package`. Its line is in `moto-more.txt`, so `./debloat.sh restore moto-more.txt` brings it back too. PayJoy was not hidden with `pm`, so no command brings it back: remove the module Hide PayJoy Access app (APatch → APM → Remove) and reboot the phone. The app folder becomes visible again, and Android finds the package at boot. I did not check in what state it comes back.
 
 **See what is hidden now (on the PC)**
 

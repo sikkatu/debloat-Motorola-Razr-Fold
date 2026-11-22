@@ -61,7 +61,7 @@ Nov 20, 2026 · @No
 
 本指南中的所有命令都在电脑上的终端里输入。如果某条命令要在手机本身上输入，我会单独说明。
 
-**如果输出和这里写的不一样。** 请停下，不要继续往下做。在这类地方，本指南会写“把输出发到文首的聊天群里”：指的就是文档开头的 [Telegram 聊天群](https://t.me/motorolafold)。请写明你停在了哪一步、第几项，并附上命令的完整输出。
+**如果输出和这里写的不一样。** 请停下，不要继续往下做：后面的命令是按照所描述的输出来写的，如果输出不同，它们可能会弄坏东西。在这类地方，本指南会自己写明该怎么做：跳过这一步、重复某一项，或者把某个包找回来。如果没有写，请用“回滚”一节里的命令，把你最后移除的东西找回来，在手机恢复到原来的样子之前不要继续。
 
 **如何重启手机。** 当本指南在移除或恢复应用的命令之后说“重启手机”时，请这样做（在电脑上）：
 
@@ -240,7 +240,7 @@ GU=$(adb shell pm list users | grep -o '{[0-9]*:Google:' | tail -n 1 | tr -dc '0
 echo Google 用户编号: $GU
 ```
 
-应该打印出与 `Success` 那一行相同的编号。如果没有打印出任何编号，请停下，并把 `adb shell pm list users` 命令的输出发到文首的聊天群里。
+应该打印出与 `Success` 那一行相同的编号。如果没有打印出任何编号，请停下：要么 adb 没有看到手机（请检查 `adb devices`），要么用户没有创建成功。运行 `adb shell pm list users`：其中必须有一行名称为 `Google` 的用户；如果没有，请重复第 2 项。
 
 **3. 启动该用户并把 Google 服务安装到其中（在电脑上）**
 
@@ -268,7 +268,7 @@ GU=$(adb shell pm list users | grep -o '{[0-9]*:Google:' | tail -n 1 | tr -dc '0
 adb shell pm set-user-restriction --user $GU no_debugging_features 0
 ```
 
-然后重新执行带 `install-existing` 的代码块和检查。这是根据 Android 源代码得出的；我没有在你的手机上验证过。如果命令打印了同样的错误，请停下：这时只能通过 root 解除禁止，而本指南不涵盖这种情况。请把错误发到文首的聊天群里。
+然后重新执行带 `install-existing` 的代码块和检查。这是根据 Android 源代码得出的；我没有在你的手机上验证过。如果命令打印了同样的错误，请停下：这时只能通过 root 解除禁止，而本指南不涵盖这种情况。手机上还没有移除任何东西；空的“Google”用户可以用“回滚”一节（最后一个代码块）中的命令删除。
 
 **4. 登录该用户和 Google 账号（在手机上）**
 
@@ -431,7 +431,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-其他行会显示“手机上没有或已被移除，跳过”：这是正常的，它们已经被移除了。`com.google.android.setupwizard` 这一行应该显示 `Success`；如果显示 `Failure`，请把这一行完整地发到文首的聊天群里。重启之后，“Finish setting up your device”通知应该消失了。
+其他行会显示“手机上没有或已被移除，跳过”：这是正常的，它们已经被移除了。`com.google.android.setupwizard` 这一行应该显示 `Success`；如果显示 `Failure`，说明这个包没能被移除，通知会保留：不用管它，指南的其余部分不依赖于它。否则，重启之后，“Finish setting up your device”通知应该消失了。
 
 如果重启后通知仍然存在，或者脚本写了“手机上没有或已被移除，跳过”，说明它是由另一个包显示的。查看有通知的包的列表（在电脑上）：
 
@@ -439,7 +439,7 @@ adb shell svc power reboot
 adb shell dumpsys notification | grep -o 'pkg=[^ ]*' | sort -u
 ```
 
-在其中找一个名称里带有 `setup` 一词的包，并把输出发到文首的聊天群里。
+在其中找一个名称里带有 `setup` 一词的包：通知很可能就是它显示的。如果它是 Google 或 Moto 的包，就用同样的方式把它那一行添加到 `google.txt` 里，然后重复移除。如果找不到这样的包，就别管这个通知：它不会妨碍其他任何东西。
 
 **3. 执行移除（在电脑上）**
 
@@ -578,7 +578,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，说明该包受到系统保护。请跳过它，并把完整的输出发到文首的聊天群里：这类包需要用与步骤 6 中 Gboard 相同的办法处理。
+如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，说明该包受到系统保护。请先跳过它：这个包会留在手机上，其他东西不会因此出问题。这类包只能用与步骤 6 中 Gboard 相同的办法移除。对 Amazon App Manager 和 PayJoy，这个办法写在步骤 6a 中；对其他的包，本指南没有写。
 
 重启之后，在手机上检查：
 
@@ -662,7 +662,7 @@ adb shell svc power reboot
 adb shell pm list packages --user 0 | grep -E 'com.motorola.aiservices|com.motorola.aicore'
 ```
 
-如果打印出了什么，请重复上一个代码块中的移除，并再次带暂停地重启手机。如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，请像第 4 项那样，把输出发到文首的聊天群里。
+如果打印出了什么，请重复上一个代码块中的移除，并再次带暂停地重启手机。如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，请像第 4 项那样跳过这个包。
 
 在手机上检查：
 
@@ -746,7 +746,7 @@ EOF
 
 **Smart Feed。** 2026 年 5 月，在启动 Amazon 时，这个信息流替换了联盟推广代码。Motorola 称这是[非有意为之](https://www.androidcentral.com/phones/motorola/motorola-affiliate-codes-your-amazon-orders-states-this-was-unintended)，并[修正了设置](https://www.notebookcheck.net/Motorola-comments-on-the-debacle-surrounding-hijacked-shopping-apps.1308600.0.html)。没有这个信息流时主屏幕的表现，我没有检查过：见第 6 项。如果主屏幕出现问题，请把 `com.motorola.smartfeed` 找回来。
 
-**PayJoy。** 这是分期付款购买手机时用的锁机客户端。如果手机不是分期购买的，就移除它。如果是分期购买的，请删掉这一行：没有客户端时锁机会怎样，我没有检查过。
+**PayJoy。** 这是分期付款购买手机时用的锁机客户端。脚本会尝试移除这个包，但在 Razr Fold 上系统会报错拒绝（报错的样子见下面的第 4 项），这个包会一直留在手机上，直到步骤 6a，那里用另一种办法移除它。
 
 有六行是禁用的。Screenshot Editor（`screenshoteditor`：截图编辑、长截图、GIF）和“受保护文件夹”（`securevault`）因其功能而保留：如果移除第二个包，文件夹里的文件在你把它找回来之前将无法访问。带问号的四个包（`installer`、`appforecast`、`motosecurecore`、`securityhubext`）之所以禁用，是因为我没有查清它们的作用。关于 `motosecurecore`，只知道步骤 5 中移除的 Moto Secure 包引用了它。
 
@@ -775,7 +775,7 @@ com.ertanto.kompas.official  # Kompas.com：面向印度尼西亚的新闻应用
 it.rainet.android.rainews  # Rai News：新闻，面向意大利的合作伙伴应用 *
 com.signatureclub.prod  # Signature Club：合作伙伴应用 *
 com.zte.iptvclient.android.idmnc  # Vision+：电视，面向印度尼西亚的合作伙伴应用 *
-com.payjoy.access  # PayJoy：分期付款购买手机的锁机客户端（如果手机是分期购买的，请删掉这一行） *
+com.payjoy.access  # PayJoy：分期付款购买手机的锁机客户端 *
 com.ironsource.appcloud.oobe.hutchison  # ironSource Aura（Hutchison）：设置过程中的应用推荐 *
 com.ironsrc.aura.tmo  # ironSource Aura（T-Mobile）：设置过程中的应用推荐 *
 com.orange.aura.oobe  # ironSource Aura（Orange）：设置过程中的应用推荐 *
@@ -852,7 +852,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-脚本的回答与步骤 4 中相同：`Success` 表示该包已被移除，“手机上没有或已被移除，跳过”表示你的手机上没有这个包。如果你没有运营商清单，脚本会提示没有找到该文件：这是正常的。如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，请像步骤 5 第 4 项那样，把输出发到文首的聊天群里。`sleep 20` 的暂停和正常重启的原因与步骤 4 中相同。
+脚本的回答与步骤 4 中相同：`Success` 表示该包已被移除，“手机上没有或已被移除，跳过”表示你的手机上没有这个包。如果你没有运营商清单，脚本会提示没有找到该文件：这是正常的。如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，请像步骤 5 第 4 项那样跳过这个包。在 Razr Fold 上有两行是这样的结果。`com.amazon.appmanager` 回答 `Failure: package is non-disable`：Motorola 保护了它。`com.payjoy.access` 会打印一长段错误文字（Java 堆栈），其中有一行 `java.lang.IllegalArgumentException: Invalid argument`：系统同样不允许移除它。两种情况下，这个包暂时都会留在手机上，脚本会继续处理下一行。这两个包在步骤 6a 中移除；在那之前，第 5 项的检查也会把它们打印出来。`sleep 20` 的暂停和正常重启的原因与步骤 4 中相同。
 
 **5. 检查这些包是否已被移除（在电脑上）**
 
@@ -986,7 +986,7 @@ adb shell svc power reboot
 
 **如果 Gboard 显示 `Failure: package is non-disable`**
 
-包名是对的，问题出在 Motorola 的保护机制上。[根据 XDA 上的报告](https://xdaforums.com/t/uninstall-bloatware-with-adb.3948300/)，在 Moto 手机上，每个受保护的包都会在 `nondisable` 文件夹（通常是 `/product/etc/nondisable`）里记录为一个单独的文件。这个分区是只读挂载的，所以即使有 root 也无法删除这个文件。但可以用 root 模块把它对系统隐藏起来：文件还在原处，系统看不到它，`pm` 就允许移除这个包。[清理这个文件夹的模块](https://xdaforums.com/t/wireguard-kernel-module-for-xt2215-4-motorola-g-stylus-5g-2022.4535379/)已经在其他 Moto 手机上装过。APatch 要把模块文件挂载到系统里，还需要另一个模块，即元模块（metamodule）：我们在 5d 中安装它。在 Razr Fold 上这样做成功了：文件在 /product/etc/nondisable 里，模块连同元模块把它隐藏了，Gboard 也被移除了。你的手机上这个文件现在在哪里、叫什么，由 5b 中的命令显示。如果在任何一步，回答与所写的不一致，请停下，并把输出发到文首的聊天群里。
+包名是对的，问题出在 Motorola 的保护机制上。[根据 XDA 上的报告](https://xdaforums.com/t/uninstall-bloatware-with-adb.3948300/)，在 Moto 手机上，每个受保护的包都会在 `nondisable` 文件夹（通常是 `/product/etc/nondisable`）里记录为一个单独的文件。这个分区是只读挂载的，所以即使有 root 也无法删除这个文件。但可以用 root 模块把它对系统隐藏起来：文件还在原处，系统看不到它，`pm` 就允许移除这个包。[清理这个文件夹的模块](https://xdaforums.com/t/wireguard-kernel-module-for-xt2215-4-motorola-g-stylus-5g-2022.4535379/)已经在其他 Moto 手机上装过。APatch 要把模块文件挂载到系统里，还需要另一个模块，即元模块（metamodule）：我们在 5d 中安装它。在 Razr Fold 上这样做成功了：文件在 /product/etc/nondisable 里，模块连同元模块把它隐藏了，Gboard 也被移除了。你的手机上这个文件现在在哪里、叫什么，由 5b 中的命令显示。如果在任何一步，回答与所写的不一致，请停下，不要进入下一步：在 5g 之前什么都没有被移除，Gboard 还留在手机上，模块可以在 APatch 里移除（APM → Remove）。
 
 **5a. 检查屏幕锁（在手机上）**
 
@@ -1008,7 +1008,7 @@ adb shell cmd package query-services -a android.view.InputMethod | grep -E 'pack
 adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i inputmethod
 ```
 
-预期的回答：一行路径，例如 `/product/etc/nondisable/nondisable-com.google.android.inputmethod.latin.xml`。你手机上的文件名可能不同，但很可能包含 `inputmethod.latin`。如果什么都没有打印，请停下：去掉 `| grep -i inputmethod` 再运行同一条命令，并把完整的输出发到文首的聊天群里。这说明保护机制的设置方式不同，下面的步骤就不适用了。
+预期的回答：一行路径，例如 `/product/etc/nondisable/nondisable-com.google.android.inputmethod.latin.xml`。你手机上的文件名可能不同，但很可能包含 `inputmethod.latin`。如果什么都没有打印，请停下：去掉 `| grep -i inputmethod` 再运行同一条命令，它会打印所有的保护文件。如果有名称不同的 Gboard 文件，请把它的文件名掩码写进 5c 中的 `PATTERN` 一行。如果没有，说明保护机制的设置方式不同，下面的步骤就不适用了，Gboard 会留在手机上。
 
 **5c. 制作模块（在电脑上）**
 
@@ -1076,7 +1076,7 @@ adb push magic_mount_rs-arm64.zip /sdcard/Download/
 
 如果 `curl` 打印出错误（例如 404），请在浏览器中打开[发布页面](https://github.com/Tools-cx-app/meta-magic_mount-rs/releases/latest)，下载名称以 `-arm64.zip` 结尾的文件（在 Assets 区域里，而不是“Source code”），并把它放进手机的 Download 文件夹。
 
-安装它（在手机上）：APatch → APM 标签页 → 安装按钮 → 在 Download 文件夹中选择这个 zip。如果日志中出现以 `!` 开头的一行，请停下，并把日志发到文首的聊天群里。安装完成后立刻重启手机（用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`）：装完元模块之后、安装其他模块之前，[APatch 要求重启](https://apatch.dev/meta-module.html)。
+安装它（在手机上）：APatch → APM 标签页 → 安装按钮 → 在 Download 文件夹中选择这个 zip。如果日志中出现以 `!` 开头的一行，说明元模块没有装上：请再把这个文件放到手机上，然后重复安装。如果同样的一行又出现了，请停下：没有元模块，后面的步骤就不起作用，Gboard 会留在手机上。安装完成后立刻重启手机（用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`）：装完元模块之后、安装其他模块之前，[APatch 要求重启](https://apatch.dev/meta-module.html)。
 
 手机启动后，打开 APM：红色提示应该消失了。然后进入 5e。如果 Unprotect Gboard 在装元模块之前就已经装上了，请在 5e 中先把它移除，并重启手机。
 
@@ -1084,7 +1084,7 @@ adb push magic_mount_rs-arm64.zip /sdcard/Download/
 
 如果这个模块已经在 APM 列表里，而 Gboard 还没有被移除，请先移除模块（APM → 移除，即 Remove）并重启手机。在元模块之前安装的模块不会被挂载：在 Razr Fold 上只有重新安装才有用。然后打开 APatch 应用，进入 APM 标签页（APatch 模块；KPM 标签页不适用于这一步）。点击安装按钮，在 Download 文件夹（下载）中选择 `unprotect-gboard.zip`。安装日志中应该出现一行 `- Hiding marker:`，后面是 5b 中的路径。然后重启手机：用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`。
 
-如果日志里显示的是 `! No marker file matches`，说明模块没有装上。这是设计如此：没有可隐藏的东西时它就不会安装。请把 5b 的输出发到文首的聊天群里。
+如果日志里显示的是 `! No marker file matches`，说明模块没有装上。这是设计如此：没有可隐藏的东西时它就不会安装。请回到 5b：那里的文件名必须符合 5c 中 `PATTERN` 的文件名掩码。如果文件的名称不同，请把它的掩码写进 `PATTERN` 一行，重复 5c，然后重新安装模块。
 
 **5f. 检查文件是否已被隐藏（在电脑上）**
 
@@ -1094,7 +1094,7 @@ adb push magic_mount_rs-arm64.zip /sdcard/Download/
 adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i inputmethod
 ```
 
-现在输出应该是空的。如果 Gboard 那一行还在，说明模块没有生效：不要进入 5g。先看 APM：如果还有关于元模块的红色提示，请重复 5d。如果没有提示，那很可能是模块在元模块之前安装的（在 Razr Fold 上，这一行没消失正是因为这个）。请移除模块（APM → Remove），重启手机，重新安装模块（5e），再重启一次，然后重复这项检查。如果这一行还在，请把 APM 的截图和命令的输出发到文首的聊天群里。
+现在输出应该是空的。如果 Gboard 那一行还在，说明模块没有生效：不要进入 5g。先看 APM：如果还有关于元模块的红色提示，请重复 5d。如果没有提示，那很可能是模块在元模块之前安装的（在 Razr Fold 上，这一行没消失正是因为这个）。请移除模块（APM → Remove），重启手机，重新安装模块（5e），再重启一次，然后重复这项检查。如果这一行还在，不要进入 5g：模块在你的固件上不起作用，Gboard 会留在手机上。请移除模块（APM → Remove）并重启手机。
 
 **5g. 移除 Gboard（在电脑上）**
 
@@ -1104,9 +1104,9 @@ sleep 20
 adb shell svc power reboot
 ```
 
-现在 `com.google.android.inputmethod.latin` 这一行应该显示 `Success`，而已经被移除的包会回答“手机上没有或已被移除”。重启之后，打开任意输入框：新键盘应该会出现。如果根本没有键盘，请用命令 `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin` 把 Gboard 找回来，等待 20 秒，用命令 `adb shell svc power reboot` 重启手机，并把命令 `adb shell settings get secure default_input_method` 的输出发到文首的聊天群里。
+现在 `com.google.android.inputmethod.latin` 这一行应该显示 `Success`，而已经被移除的包会回答“手机上没有或已被移除”。重启之后，打开任意输入框：新键盘应该会出现。如果根本没有键盘，请用命令 `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin` 把 Gboard 找回来，等待 20 秒，用命令 `adb shell svc power reboot` 重启手机，然后回到本步骤的第 3 项和第 4 项：新键盘必须是开启的并且是主键盘，命令 `adb shell settings get secure default_input_method` 的输出里必须是它。只有这样，才能再重复 5g。
 
-**关于这个模块。** 只要 Gboard 处于被移除状态，就不要删除或关闭这个模块，也不要删除或关闭元模块：没有元模块，模块就不起作用；而当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。如果固件更新之后 Gboard 又显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，说明新固件里文件的名称变了：请重复 5b–5f。如果是别的包显示 `non-disable`，请把输出发到文首的聊天群里：模块只需改一行就能修好。
+**关于这个模块。** 只要 Gboard 处于被移除状态，就不要删除或关闭这个模块，也不要删除或关闭元模块：没有元模块，模块就不起作用；而当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。如果固件更新之后 Gboard 又显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，说明新固件里文件的名称变了：请重复 5b–5f。如果是别的包显示 `non-disable`，就把这个包留在手机上：这一步的模块只隐藏 Gboard 的文件。Amazon App Manager 和 PayJoy 请看步骤 6a。对于其他任何包，就得修改 5c 中的 `PATTERN` 一行，而这里没有涉及这种情况。
 
 **如果安装模块或元模块之后手机无法启动。** 这种情况不太可能：模块只隐藏一个文件，元模块只负责挂载模块文件。但如果真的发生了，请开启 APatch 的安全模式：其中所有模块都会被关闭，而且在 APM 中“Remove”按钮可用：把你最后安装的那个（元模块或模块）移除。[APatch 的说明](https://apatch.dev/rescue-bootloop.html)：按住电源键直到屏幕亮起，然后按下再松开，直到出现第一个画面。那个页面的标题里还提到了音量“下”键，但没有写明按几次，所以这个方法可能需要尝试几次。如果没有成功，请按末尾“如果手机无法启动”一节操作。
 
@@ -1131,6 +1131,172 @@ adb shell cmd package install-existing --user 0 com.google.android.dialer
 ```
 
 找回来的拨号器应该不会碍事：只要 Fossify Phone 是默认拨号器，普通通话就都经过它，而系统拨号器只在紧急呼叫时才需要。这是我所知道的情况，没有在你的手机上检查过。
+
+## 步骤 6a. 另外两个受保护的包：Amazon App Manager 和 PayJoy
+
+做完步骤 5a 之后，手机上还剩两个来自 `moto-more.txt` 的包：`com.amazon.appmanager`（回答 `Failure: package is non-disable`）和 `com.payjoy.access`（一长段 Java 错误，其中有一行 `IllegalArgumentException: Invalid argument`）。它们受到两种不同方式的保护，所以各有一个模块。两个模块都只能通过元模块起作用：如果你还没有安装它，请先做 5d，然后再回到这里。这些步骤重复步骤 6：制作模块、安装、重启、检查。已在 Razr Fold 上检查过：第一个模块并重启之后，`com.amazon.appmanager` 这一行回答了 `Success`；第二个模块并重启之后，PayJoy 从主用户的包列表中消失了。
+
+如果在任何一步，回答与所写的不一致，请停下，不要进入下一步：模块什么都不删除，而且任何一个模块都可以在 APatch 里移除（APM → Remove）。
+
+**6a-1. Amazon App Manager：找到保护文件（在电脑上）**
+
+保护方式和 Gboard 相同：`nondisable` 文件夹里有一个以包名命名的文件。找到它：
+
+```
+adb shell "find /system /system_ext /product /vendor /odm -path '*nondisable*' -type f 2>/dev/null" | grep -i amazon
+```
+
+预期的回答：一行路径。在 Razr Fold 上是 `/product/etc/nondisable/com.amazon.appmanager.mdip.xml`。这个名称和 Gboard 的文件不同（开头没有 `nondisable-`），所以模块是按包名来找文件的。如果什么都没有打印，请停下：要么你没有这个包，要么在你的手机上它不是由文件保护的，下面的步骤就不适用了。
+
+**6a-2. Amazon App Manager：制作模块（在电脑上）**
+
+代码和 5c 中的相同，只有文件名掩码和名称不同。请整块复制：
+
+```
+cd ~/razr-debloat
+mkdir -p amazon-module
+cd amazon-module
+cat > module.prop <<'EOF'
+id=unprotect_amazon
+name=Unprotect Amazon App Manager (Motorola nondisable)
+version=1.0
+versionCode=1
+author=local
+description=Hides the Motorola nondisable marker of Amazon App Manager so that pm uninstall --user 0 works
+EOF
+cat > customize.sh <<'EOF'
+# 对系统隐藏 Motorola 的保护文件（nondisable）。什么都不删除。
+# PATTERN：文件名掩码。'*com.amazon.appmanager*' 表示 Amazon App Manager。
+PATTERN='*com.amazon.appmanager*'
+
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  if [ "$PART" = system ]; then
+    SRC=/system/etc/nondisable
+    DST=$MODPATH/system/etc/nondisable
+  else
+    SRC=/$PART/etc/nondisable
+    DST=$MODPATH/system/$PART/etc/nondisable
+  fi
+  [ -d "$SRC" ] || continue
+  for F in "$SRC"/$PATTERN; do
+    [ -e "$F" ] || continue
+    mkdir -p "$DST"
+    mknod "$DST/${F##*/}" c 0 0
+    ui_print "- Hiding marker: $F"
+    FOUND=1
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No marker file matches $PATTERN in /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../unprotect-amazon.zip module.prop customize.sh
+cd ..
+adb push unprotect-amazon.zip /sdcard/Download/
+```
+
+如果找不到 `python3`，请把含有它的那一行替换为 `zip ../unprotect-amazon.zip module.prop customize.sh`。
+
+**6a-3. Amazon App Manager：安装模块并移除这个包**
+
+在手机上：APatch → APM → 安装按钮 → 在 Download 文件夹中选择 `unprotect-amazon.zip`。安装日志中应该出现一行 `- Hiding marker:`，后面是 6a-1 中的路径。如果日志里显示的是 `! No marker file matches`，说明模块没有装上：这是设计如此，没有可隐藏的东西，请回到 6a-1。然后重启手机：用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`。
+
+重启之后，重复 6a-1 中的命令（在电脑上）：现在输出应该是空的。如果路径那一行还在，说明模块没有生效：请检查和 5f 中相同的东西（APM 里关于元模块的红色提示，以及模块是不是在元模块之前安装的）。如果输出是空的，就移除这个包：
+
+```
+./debloat.sh remove moto-more.txt
+sleep 20
+adb shell svc power reboot
+```
+
+`com.amazon.appmanager` 这一行现在应该显示 `Success`（在 Razr Fold 上就是这样），而已经被移除的包会回答“手机上没有或已被移除，跳过”。`com.payjoy.access` 这一行暂时仍然会给出 Java 错误：这是正常的，下面再处理它。
+
+**6a-4. PayJoy：它有什么不同（在电脑上）**
+
+对 PayJoy 来说，隐藏保护文件没有用。在我的手机上，第一个模块连它的文件（`/product/etc/nondisable/com.payjoy.access.xml`）也隐藏了，但报错还在：任何带有这个包名的 `pm` 命令都会以同样的 `IllegalArgumentException: Invalid argument` 失败，连只读的 `pm path` 也一样，不管是从 adb 运行还是以 root 运行。“payjoy”这个词出现在系统框架本身的文件里（`framework.jar`、`moto-core_services.jar`、`framework-res.apk`，还有单独的 `payjoy-api` 库），所以我认为检查包名的是固件的代码；确切的位置我没有找。overlay `com.motorola.android.overlay.payjoy` 与此无关：里面只有一个数组 `config_payjoy_channellist`，而且系统不允许把它关闭。同时，系统本来就把这个包保持在关闭状态：`dumpsys package com.payjoy.access` 在 Razr Fold 上显示 `enabled=2`（“已关闭”），在全部三个用户中都是如此，也就是说，在移除之前它就没有在工作。
+
+既然 `pm` 不接受这个名称，这里就不用 `pm`。第二个模块隐藏的是应用的文件夹 `/product/priv-app/PayJoyAccess`。用模块把文件或文件夹从系统中去掉的这种办法，在 [KernelSU 的文档](https://kernelsu.org/guide/module.html)中有说明（`mknod … c 0 0`）；在 Razr Fold 上，它配合 5d 中的元模块起作用了。下次开机时，Android 找不到这个应用，就会丢弃这个包。什么都没有被删除：文件仍留在分区上，模块只在它被安装期间遮住它们。
+
+看看你的手机上有什么：
+
+```
+adb shell pm list packages -f | grep -i payjoy
+```
+
+在 Razr Fold 上它打印两行：`package:/product/priv-app/PayJoyAccess/PayJoyAccess.apk=com.payjoy.access` 和 overlay `package:/product/overlay/MotoFrameworkResOverlayPayjoy.apk=com.motorola.android.overlay.payjoy`。如果没有带应用本身的那一行（`.../priv-app/...apk`），说明你的手机上没有它：请跳过 6a-5 和 6a-6。
+
+**6a-5. PayJoy：制作模块（在电脑上）**
+
+这个模块的 `customize.sh` 会在各分区的 `priv-app` 和 `app` 中查找名称里带有“payjoy”的文件夹（不区分大小写），所以不需要代入名称。请整块复制：
+
+```
+cd ~/razr-debloat
+mkdir -p payjoy-module
+cd payjoy-module
+cat > module.prop <<'EOF'
+id=hide_payjoy_app
+name=Hide PayJoy Access app (Motorola)
+version=1.0
+versionCode=1
+author=local
+description=Hides the PayJoy Access system app folder so that Android drops the package at boot
+EOF
+cat > customize.sh <<'EOF'
+# 对 Android 隐藏 PayJoy Access 系统应用的文件夹。什么都不删除：
+# 文件仍留在分区上，模块只在启用期间遮住它们。
+# 下次启动时，包管理器找不到这个应用，就会丢弃这个包。
+# 名称检查不区分大小写：在文件夹名称里查找 "payjoy"。
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  for SUB in priv-app app; do
+    if [ "$PART" = system ]; then
+      SRC=/system/$SUB
+      DST=$MODPATH/system/$SUB
+    else
+      SRC=/$PART/$SUB
+      DST=$MODPATH/system/$PART/$SUB
+    fi
+    [ -d "$SRC" ] || continue
+    for D in "$SRC"/*; do
+      [ -d "$D" ] || continue
+      case "${D##*/}" in
+        *[Pp][Aa][Yy][Jj][Oo][Yy]*)
+          mkdir -p "$DST"
+          mknod "$DST/${D##*/}" c 0 0
+          [ -c "$DST/${D##*/}" ] || abort "! mknod failed for $DST/${D##*/}"
+          ui_print "- Hiding app folder: $D"
+          FOUND=1
+          ;;
+      esac
+    done
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No PayJoy folder in priv-app or app of /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../hide-payjoy.zip module.prop customize.sh
+cd ..
+adb push hide-payjoy.zip /sdcard/Download/
+```
+
+如果找不到 `python3`，请把含有它的那一行替换为 `zip ../hide-payjoy.zip module.prop customize.sh`。
+
+**6a-6. PayJoy：安装模块并检查**
+
+和 6a-3 一样安装（在手机上）：APatch → APM → 安装按钮 → 在 Download 文件夹中选择 `hide-payjoy.zip`。日志中应该出现一行 `- Hiding app folder:`，后面是路径。如果日志里显示的是 `! No PayJoy folder`，说明模块没有装上：你的手机上没有可隐藏的东西。然后重启手机：用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`。
+
+重启之后检查（在电脑上）：
+
+```
+adb shell pm list packages --user 0 | grep -i payjoy
+adb shell "ls /product/priv-app | grep -i payjoy"
+```
+
+第一条命令应该只打印 `package:com.motorola.android.overlay.payjoy`，第二条什么都不打印。overlay 会留下：这是不带代码的资源，而移除脚本不会碰 overlay。如果应用本身的包还在列表里，说明模块没有生效：请看 APM（关于元模块的红色提示不应该出现，模块应该在列表里并且处于启用状态），重复安装和重启。如果还是一样，请移除模块（APM → Remove）并重启手机：PayJoy 会保持被系统关闭的状态。
+
+**关于这两个模块。** 只要这两个包处于被移除状态，就不要删除或关闭这两个模块和元模块。对 Amazon App Manager，原因和 Gboard 相同：当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。PayJoy 在它的模块被移除之后，会连同它的文件夹一起回来。我只在 Razr Fold 上检查过：装上两个模块之后手机正常启动了，而其他版本的固件会如何对待消失的 PayJoy 包，我不知道。系统更新之后该怎么办，写在步骤 10 中。如果安装模块之后手机无法启动，请开启 APatch 的安全模式，方法见步骤 6（“如果安装模块或元模块之后手机无法启动”），并移除你最后安装的那个模块。
 
 ## 步骤 7. 从主用户中移除 Google 服务
 
@@ -1175,7 +1341,7 @@ adb shell svc power reboot
 
 行的顺序很重要：Google Play 服务最后移除。
 
-如果某一行得到的回答是 `Failure: package is non-disable`，请停下，并把完整的输出发到文首的聊天群里。步骤 6 中的模块只针对 Gboard 设置，要用于这些包就得重做。在 Razr Fold 上它们没有保护：五个包都回答了 Success。
+如果某一行得到的回答是 `Failure: package is non-disable`，请停下：这个包会留在手机上，其他东西不会因此出问题。步骤 6 中的模块只针对 Gboard 设置，要用于这些包就得重做。在 Razr Fold 上它们没有保护：五个包都回答了 Success。
 
 ```
 cat > gms.txt <<'EOF'
@@ -1199,7 +1365,7 @@ adb shell svc power reboot
 adb shell pm list packages --user 0 | grep -E 'package:(com.android.vending|com.google.android.gsf|com.google.android.gms)'
 ```
 
-这条命令应该什么都不打印（`overlay.gmsconfig` 这类行在这里不会匹配：它们不是应用）。在 Razr Fold 上，经过暂停和正常重启之后，输出是空的。如果打印出了什么，说明被移除的东西又回来了：请重复第 4 项，不要跳过暂停，并把输出发到文首的聊天群里。如果一切都干净，就去走一遍步骤 8 的检查清单。如果不断弹出“应用已停止运行”的消息，请用命令 `./debloat.sh restore gms.txt` 把这些服务找回来，等待 20 秒，用命令 `adb shell svc power reboot` 重启手机，并记下消息里的应用名称。
+这条命令应该什么都不打印（`overlay.gmsconfig` 这类行在这里不会匹配：它们不是应用）。在 Razr Fold 上，经过暂停和正常重启之后，输出是空的。如果打印出了什么，说明被移除的东西又回来了：请重复第 4 项，不要跳过暂停，并在重启之后再检查一次。如果这些包又回来了，请停下：在你的固件上移除不能保持，手机会继续带着它们工作。如果一切都干净，就去走一遍步骤 8 的检查清单。如果不断弹出“应用已停止运行”的消息，请用命令 `./debloat.sh restore gms.txt` 把这些服务找回来，等待 20 秒，用命令 `adb shell svc power reboot` 重启手机，并记下消息里的应用名称：它依赖 Google 服务，所以请在“Google”用户里运行它。
 
 ## 步骤 8. 检查手机是否正常工作
 
@@ -1217,7 +1383,7 @@ adb shell pm list packages --user 0 | grep -E 'package:(com.android.vending|com.
 | NFC | 在下拉通知栏或设置中开启和关闭 NFC | 开关正常 |
 | 解锁 | 锁定手机，再用指纹或人脸解锁 | 解锁正常 |
 | 相机 | 拍一张照片和一段视频，从缩略图打开拍好的照片 | 照片在 Fossify Gallery 中打开 |
-| 相机联网 | 如果你做了步骤 12：读取该步骤第 7 项中的日志 | 日志里有“com.motorola.camera5: 已发送禁止指令”（block-net.list 里的其他包也一样）和“完成”这样的行，并且没有错误文本（只有带 get-package-networking-enabled 的那一行允许出现错误） |
+| 相机联网 | 如果你做了步骤 12：读取该步骤第 7 项中的日志 | 日志里有“chain3: 正常”“com.motorola.camera5: 已发送禁止指令”和“检查: com.motorola.camera5:deny”（block-net.list 里的其他包也一样）以及“完成”这些行，并且没有带“错误”的行（只有“检查:”这一行允许出现错误文本） |
 | 折叠和外屏 | 折叠再展开手机，在外屏上打开一个应用 | 屏幕切换没有故障 |
 | 声音 | 播放音乐或视频，打开设置 → 声音 | 声音正常播放，“声音”页面能打开 |
 | 手写笔 | 如果你移除了手写笔的包（步骤 5 第 5 项）：检查手写笔的连接，在改变压力的同时画一条线，按一下侧键 | 手写笔已连接，压感和侧键都正常 |
@@ -1381,6 +1547,8 @@ echo 'com.example.newpackage  # 名称' >> moto.txt
 
 **Gboard 保护模块和元模块。** 它们在 `/data/adb/modules` 中，系统更新不会动 `/data`，但这个模块只有在 APatch 处于活动状态时才起作用，也就是 boot 重新打上补丁之后。如果重新运行清单时 Gboard 显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，请重复步骤 6 中的 5b–5f。
 
+**步骤 6a 中的模块。** 它们同样在 `/data/adb/modules` 中，起作用的条件也相同：只有在 APatch 处于活动状态时。如果重新运行清单时 `com.amazon.appmanager` 显示 `non-disable`，或者 `com.payjoy.access` 打印出 Java 错误，说明这个包回来了：请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且两个模块都应该在列表里并且处于启用状态。如果一切都正常，这个包却还是回来了，说明新固件里文件或文件夹的名称变了：请移除这个包对应的模块（APM → Remove），重启手机，再重复它在步骤 6a 中的各步。系统更新之后我没有检查过这一点。
+
 ## 步骤 11. Shelter 工作资料：像主用户一样清除 Moto 和 Google 垃圾
 
 步骤 4–7 中的命令只在主用户中移除应用：它们都带有 `--user 0`。Shelter 创建的工作资料是手机上一个独立的用户，有它自己的被隐藏应用清单，而 Moto 和 Google 的东西会在里面再次出现。这一步在那里移除的，是我们在主用户中移除过的同样的东西：Google 应用（`google.txt`）、Moto 垃圾（`moto.txt`、`moto-extra.txt`、`moto-ai.txt`）、`google-roles.txt` 中的 Google 版本、Google 拨号器、Moto 的“笔记”，以及 `gms.txt` 中的 Google 服务（Play 商店、Services Framework、Google Play 服务）和步骤 5a 的残留（`google-more.txt`、`moto-more.txt`、`carriers.txt`）。
@@ -1429,7 +1597,7 @@ su -c 'sh /data/local/tmp/profile-remove.sh'
 comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort) | grep -E 'google|motorola'
 ```
 
-这条命令会显示出现在工作资料里、但主用户里已经没有的 Google 和 Moto 包。它应该什么都不打印。如果打印出了什么，请把输出发到文首的聊天群里。不要动工作资料里其他的 Google 系统包，例如 `com.google.android.permissioncontroller` 或 `com.google.android.webview`。然后带暂停地重启手机（第 6 项）。
+这条命令会显示出现在工作资料里、但主用户里已经没有的 Google 和 Moto 包。它应该什么都不打印。如果打印出了什么，说明脚本没有移除这些包：要么系统不允许，要么它们不在你的清单里。不用管它们，工作资料带着它们也能正常使用。想看原因，可以手动移除其中一个包（在手机上，在 Termux 中）：`su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`，把 12 换成你自己的编号，把 PACKAGE\_NAME 换成包名；回答 `Failure` 会显示原因。不要动工作资料里其他的 Google 系统包，例如 `com.google.android.permissioncontroller` 或 `com.google.android.webview`。然后带暂停地重启手机（第 6 项）。
 
 **6. 带暂停地重启手机（在电脑上）**
 
@@ -1456,7 +1624,7 @@ su -c 'cmd package install-existing --user 12 PACKAGE_NAME'
 
 **工作原理。** Android 在系统层面有针对单个应用的联网禁令：它不使用 VPN，也不需要额外的应用。它由 `cmd connectivity` 命令控制。根据使用同一机制的 ShizuWall 应用的说明，这些命令在 Android 11 及更高版本上有效，而且规则会在每次重启时被重置。所以检查之后，我们会在手机上放一个小脚本：APatch 每次开机都会运行它，并重新开启这个禁令。脚本放在 `/data/adb/service.d` 文件夹里，系统更新或重新刷入 boot 镜像都不会把它抹掉。
 
-请在完成步骤 1–10 之后再做这一步。你需要有 root 权限的 Termux，和步骤 11 中一样。这些命令我没有在你的 Razr Fold 上检查过，所以请先在 Termux 上检查这个禁令（第 3 项），然后再禁止相机联网。
+请在完成步骤 1–10 之后再做这一步。你需要有 root 权限的 Termux，和步骤 11 中一样。这一步的命令在 Razr Fold 上运行过；具体检查了什么、没有检查什么，见本步骤末尾。即便如此，也请先在 Termux 上检查这个禁令（第 3 项），然后再禁止相机联网：这样你就能确认禁令在你的固件上确实能切断网络。
 
 **1. 检查手机是否支持这些命令（在电脑上）**
 
@@ -1464,7 +1632,7 @@ su -c 'cmd package install-existing --user 12 PACKAGE_NAME'
 adb shell cmd connectivity help | grep -iE 'chain3|package-networking'
 ```
 
-应该打印出含有 `set-chain3-enabled` 和 `set-package-networking-enabled` 这两个词的行（旁边可能还有带 `get-` 的行）。如果什么都没有打印，说明这个固件没有这样的命令：请停下，并把 `adb shell cmd connectivity help` 命令的输出发到文首的聊天群里，那里会给出替代方法。
+应该打印出含有 `set-chain3-enabled` 和 `set-package-networking-enabled` 这两个词的行（旁边可能还有带 `get-` 的行）。如果什么都没有打印，说明这个固件没有这样的命令，所以请跳过步骤 12 和步骤 12a：本指南没有别的办法能给应用断网。指南的其余部分不依赖它们。
 
 **2. 查明相机是否与其他应用共用同一个编号（在电脑上）**
 
@@ -1474,25 +1642,26 @@ Android 是按应用编号（uid）而不是按包名来切断网络的。如果
 U=$(adb shell pm list packages -U --user 0 | tr -d '\r' | sed -n 's/^package:com\.motorola\.camera5 uid:\([0-9]*\)$/\1/p'); echo "相机编号: $U"; adb shell pm list packages -U --user 0 | tr -d '\r' | grep " uid:$U\$"
 ```
 
-第一行会显示一个 10000 或更大的数字，它下面应该恰好有一行 `package:com.motorola.camera5 uid:…`。如果这个编号是空的，说明手机上没有这个包：请把命令 `adb shell pm list packages --user 0 | grep camera` 的输出发到文首的聊天群里。如果编号下面有多行，或者编号小于 10000，请停下，并把输出发到文首的聊天群里。
+第一行会显示一个 10000 或更大的数字，它下面应该恰好有一行 `package:com.motorola.camera5 uid:…`。如果这个编号是空的，说明手机上没有这个名称的包。命令 `adb shell pm list packages --user 0 | grep camera` 会显示相机在你的手机上叫什么；请在这一步里用这个名称代替 `com.motorola.camera5`，然后重复这一项。如果编号下面有多行，或者编号小于 10000，请停下：这条禁令会切断其他包甚至系统本身的网络，所以请让相机保留联网，并跳过步骤 12 的其余部分和步骤 12a。
 
 **3. 在 Termux 上检查这个禁令（在手机和电脑上）**
 
-先不要在相机上检查，而是在 Termux 上检查这个禁令：这能说明它在你的固件上是否有效。请先确认 Termux 能联网（在手机上，在 Termux 中）：
+先不要在相机上检查，而是在 Termux 上检查这个禁令：这能说明它在你的固件上是否有效。请先更新 Termux：软件包过旧时，`curl` 可能报错，错误信息里带有 `SSL_set_quic_tls_early_data_enabled`（在 Razr Fold 上就出现过，更新后恢复正常）。如果更新过程中 Termux 提出问题，直接按回车。然后确认 Termux 能联网（在手机上，在 Termux 中）：
 
 ```
+pkg update && pkg upgrade -y
 pkg install -y curl
 curl -sS -m 5 -I https://example.com
 ```
 
-应该打印出响应头，第一行以 `HTTP/` 开头。禁止 Termux 联网（在电脑上）：
+应该打印出响应头，第一行以 `HTTP/` 开头。禁止 Termux 联网（在电脑上）。第一条命令什么都不打印，第二条命令会打印出类似 `Disabled networking for com.termux, appId …` 的一行：
 
 ```
 adb shell cmd connectivity set-chain3-enabled true
 adb shell cmd connectivity set-package-networking-enabled false com.termux
 ```
 
-在 Termux 中重复 `curl -sS -m 5 -I https://example.com`（在手机上）：现在它应该以错误结束，例如 `Could not resolve host` 或 `timed out`。如果 curl 又打印出了响应头，说明这个禁令在你的固件上不起作用：请停下，并把输出发到文首的聊天群里。如果一切如上所述，就把网络还给 Termux（在电脑上）：
+在 Termux 中重复 `curl -sS -m 5 -I https://example.com`（在手机上）：现在它应该以错误结束，例如 `Could not resolve host` 或 `timed out`。如果 curl 又打印出了响应头，说明这个禁令在你的固件上不起作用：执行完下一条命令后，请跳过步骤 12 的其余部分和步骤 12a。无论如何，都要把网络还给 Termux（在电脑上）；回答是类似 `Enabled networking for com.termux, appId …` 的一行：
 
 ```
 adb shell cmd connectivity set-package-networking-enabled true com.termux
@@ -1505,7 +1674,7 @@ adb shell cmd connectivity set-chain3-enabled true
 adb shell cmd connectivity set-package-networking-enabled false com.motorola.camera5
 ```
 
-这些命令什么都不打印。打开相机，拍一张照片和一段视频：拍摄应该和以前一样。如果相机打不开，或者整部手机都没有网络了，请用命令 `adb shell svc power reboot` 重启手机：规则会被重置。然后把发生的情况描述发到文首的聊天群里。如果第 1 项中帮助信息的输出里有 `get-package-networking-enabled` 这一行，就可以检查这个禁令：相机得到的回答应该与普通应用（例如 `com.android.settings`）得到的回答不同：
+第一条命令什么都不打印，第二条命令会打印出类似 `Disabled networking for com.motorola.camera5, appId 10270` 的一行（编号可能不同，但不小于 10000）：系统就是这样确认禁令的。打开相机，拍一张照片和一段视频：拍摄应该和以前一样。如果相机打不开，或者整部手机都没有网络了，请用命令 `adb shell svc power reboot` 重启手机：规则会被重置。然后不要继续往下做：让相机保留联网，并跳过步骤 12 的其余部分和步骤 12a。如果第 1 项中帮助信息的输出里有 `get-package-networking-enabled` 这一行，就可以检查这个禁令：相机应该回答 `com.motorola.camera5:deny`，而普通应用，例如 `com.android.settings`，应该回答 `com.android.settings:allow`：
 
 ```
 adb shell cmd connectivity get-package-networking-enabled com.motorola.camera5
@@ -1537,17 +1706,27 @@ n=0
 until [ "$(getprop sys.boot_completed)" = "1" ] || [ "$n" -ge 150 ]; do sleep 2; n=$((n+1)); done
 sleep 15
 echo "开始: $(date)"
-cmd connectivity set-chain3-enabled true </dev/null
+echo "上下文: $(id -Z 2>/dev/null)"
+# 丢弃 cmd 的输出：当它被写入日志时，调用曾因“Failed transaction”而失败。
+# 结果通过退出码判断。出错时会重复调用，最多 12 次。
+run() {
+  i=0
+  while [ "$i" -lt 12 ]; do
+    cmd connectivity "$@" </dev/null >/dev/null 2>&1 && return 0
+    i=$((i+1)); sleep 5
+  done
+  return 1
+}
+if run set-chain3-enabled true; then echo "chain3: 正常"; else echo "chain3: 错误"; fi
 grep -Ev '^[[:space:]]*(#|$)' "$LIST" | tr -d '\r' | while read -r pkg _; do
-  cmd connectivity set-package-networking-enabled false "$pkg" </dev/null
-  echo "$pkg: 已发送禁止指令"
-  cmd connectivity get-package-networking-enabled "$pkg" </dev/null
+  if run set-package-networking-enabled false "$pkg"; then echo "$pkg: 已发送禁止指令"; else echo "$pkg: 错误"; fi
+  echo "检查: $(cmd connectivity get-package-networking-enabled "$pkg" </dev/null 2>&1)"
 done
 echo "完成"
 EOF
 ```
 
-脚本会等待开机完成，再等 15 秒，然后开启总开关，并对清单中的每个包禁止联网。结果写入 `/data/adb/block-net.log`。带有 `get-package-networking-enabled` 的那一行只是为了写日志：如果你的固件没有这个命令，日志里这一行会显示错误，但禁令仍然有效。
+脚本会等待开机完成，再等 15 秒，然后开启总开关，并对清单中的每个包禁止联网。如果系统没有接受某条命令，脚本会重复执行，最多 12 次，每次间隔 5 秒。结果写入 `/data/adb/block-net.log`：日期、系统上下文、每条命令的结果，以及每个包的一行 `检查:`，其中是系统报告的禁令状态。`检查:` 这一行只是为了写日志：如果你的固件没有 `get-package-networking-enabled` 这个命令，日志里这一行会显示错误，但禁令仍然有效。
 
 **6. 把文件放到手机上（在电脑和手机上）**
 
@@ -1564,7 +1743,7 @@ adb push block-net.list /data/local/tmp/block-net.list
 su -c 'mkdir -p /data/adb/service.d && cp /data/local/tmp/block-net.sh /data/adb/service.d/block-net.sh && chmod 755 /data/adb/service.d/block-net.sh && cp /data/local/tmp/block-net.list /data/adb/block-net.list && chmod 644 /data/adb/block-net.list && echo 完成'
 ```
 
-应该打印出“完成”。如果没有，请把全部输出发到文首的聊天群里。
+应该打印出“完成”。如果没有，说明有一条命令失败了，错误文本会说明是哪一条：最常见的原因是 Termux 没有 root（请按步骤 9 第 1 项的方法开启它），或者上一个代码块中的 `adb push` 命令没有把文件复制过去。请改正后重复这条命令。
 
 **7. 重启手机并检查日志（在电脑和手机上）**
 
@@ -1580,7 +1759,7 @@ adb shell svc power reboot
 su -c 'cat /data/adb/block-net.log'
 ```
 
-日志里应该有带日期的 `开始:` 这一行，然后是 `com.motorola.camera5: 已发送禁止指令`，接着是 `get-package-networking-enabled` 的回答，最后是 `完成`。如果文件不存在或是空的，说明 APatch 没有运行这个脚本：请用命令 `su -c 'ls -l /data/adb/service.d/block-net.sh'` 检查权限（这一行应该以 `-rwxr-xr-x` 开头），并把输出发到文首的聊天群里。如果日志里有错误，例如 `Unknown command`，请把完整的日志发到文首的聊天群里。然后过一遍步骤 8 的检查清单。
+日志里应该有带日期的 `开始:` 这一行，一行 `上下文:`（在 Razr Fold 上是 `u:r:magisk:s0`；值不同也没关系），然后是 `chain3: 正常`、`com.motorola.camera5: 已发送禁止指令`、`检查: com.motorola.camera5:deny`，最后是 `完成`。如果文件不存在或是空的，说明 APatch 没有运行这个脚本：请用命令 `su -c 'ls -l /data/adb/service.d/block-net.sh'` 检查权限（这一行应该以 `-rwxr-xr-x` 开头）。如果权限不对或者没有这个文件，请重复第 6 项。如果权限正确而日志仍然是空的，说明 APatch 在开机时没有启动这个脚本：这样禁令就不是永久的，所以每次重启之后都要重复第 4 项中的命令（或者按第 8 项解除禁令）。如果日志里出现 `chain3: 错误`，或者出现 `com.motorola.camera5: 错误` 而不是 `com.motorola.camera5: 已发送禁止指令`，或者 `检查:` 这一行显示 `allow`，说明禁令没有生效：请用第 8 项中的第二条命令删除这个脚本，并跳过步骤 12a。如果只有 `检查:` 这一行显示错误，而 `chain3: 正常` 和 `已发送禁止指令` 都在，多半是你的固件没有 `get-package-networking-enabled` 这个命令，禁令是生效的。然后过一遍步骤 8 的检查清单。
 
 **8. 如何解除禁令（在电脑和手机上）**
 
@@ -1596,9 +1775,9 @@ adb shell cmd connectivity set-package-networking-enabled true com.motorola.came
 su -c 'rm /data/adb/service.d/block-net.sh'
 ```
 
-**系统更新和内核改动。** 脚本和清单放在 `/data/adb` 中，所以只要 APatch 在手机上正常工作，系统更新、重新刷入 boot 镜像和更换内核都不会影响它们。在 root 还没有恢复期间（例如在更新之后、按步骤 10 重新刷入 boot 之前），相机的联网是没有被切断的。据我所知，这条规则存放在系统的 BPF 表中，而不是 netfilter 这类内核模块里，所以为 Droidspaces 定制的内核应该不会破坏它；这是我的推测，不是检查的结果。更新或改动内核之后请重复第 7 项，改动内核之后还要重复第 3 项中的 Termux 检查：日志只能说明命令已发送，不能说明禁令已生效。
+**系统更新和内核改动。** 脚本和清单放在 `/data/adb` 中，所以只要 APatch 在手机上正常工作，系统更新、重新刷入 boot 镜像和更换内核都不会影响它们。在 root 还没有恢复期间（例如在更新之后、按步骤 10 重新刷入 boot 之前），相机的联网是没有被切断的。据我所知，这条规则存放在系统的 BPF 表中，而不是 netfilter 这类内核模块里，所以为 Droidspaces 定制的内核应该不会破坏它；这是我的推测，不是检查的结果。更新或改动内核之后请重复第 7 项，改动内核之后还要重复第 3 项中的 Termux 检查：日志只能说明系统接受了禁令，不能说明网络真的被切断了。
 
-**我没有在你的手机上检查的内容。** 这个固件上的 `cmd connectivity` 命令本身，APatch 下从 `service.d` 运行脚本的情况，以及禁令能否在更新后保留。所以第 3 项和第 7 项是必做的。这个禁令只适用于主用户：它不影响“Google”用户和 Shelter 工作资料中的相机（如果那里有的话）。
+**检查了什么，没检查什么。** 在 Razr Fold 上检查过：第 4 项中的命令会被接受，回答与那里所写一致；设置禁令之后，对相机执行 `get-package-networking-enabled` 会回答 `com.motorola.camera5:deny`；APatch 会在开机时运行 `service.d` 中的脚本，最终版脚本的日志与第 7 项所写相符。没有检查：禁令能否在系统更新和更换内核后保留。所以第 3 项和第 7 项是必做的。这个禁令只适用于主用户：它不影响“Google”用户和 Shelter 工作资料中的相机（如果那里有的话）。
 
 ## 步骤 12a. 保留的包中哪些仍能联网
 
@@ -1702,7 +1881,7 @@ diff <(cut -d' ' -f3 audit_internet_before.txt) <(cut -d' ' -f3 audit_internet.t
 
 以 `>` 开头的行是更新之后新出现的：请按上面的表格来处理它们。关闭网络是通过 `/data/adb` 中的脚本实现的，而不是通过移除清单，所以它不会让任何被移除的内容回来。内核改动之后，请再检查一次禁令：步骤 12 的第 3 项和第 7 项。
 
-**我没有检查的内容。** 我只是在 `pm` 和 `dumpsys` 的示例输出上运行了这一步的命令；它们没有在 Razr Fold 上运行过。Bayton 的数据来自其他机型。INTERNET 权限说明的是一种可能性，而不是发送的事实：只有网络监控工具或带连接日志的防火墙，才能证明某个包什么都没有发送，或者抓到它在发送，而这不属于本指南的内容。
+**检查了什么，没检查什么。** 关闭某个包联网的命令与步骤 12 中的相同，它已在 Razr Fold 上检查过（见步骤 12 末尾）。这一步中查找软件包及其权限的命令，我只是在 `pm` 和 `dumpsys` 的示例输出上运行过；它们没有在 Razr Fold 上运行过。Bayton 的数据来自其他机型。INTERNET 权限说明的是一种可能性，而不是发送的事实：只有网络监控工具或带连接日志的防火墙，才能证明某个包什么都没有发送，或者抓到它在发送，而这不属于本指南的内容。
 
 ## 回滚：出问题时怎么办
 
@@ -1743,6 +1922,10 @@ adb shell svc power reboot
 ```
 
 如果你还想移除步骤 6 中的保护模块，请先用这条命令把 Gboard 找回来，再移除模块：APatch → APM → Remove，然后重启手机。我没有检查过，当一个已被移除的包的保护重新生效时，系统会怎么处理它，所以才按这个顺序。最好把元模块留在原处：没有它，其他模块的文件也不会再被挂载。
+
+**把 Amazon App Manager 和 PayJoy 找回来（在电脑和手机上）**
+
+Amazon App Manager 用“把单个包找回来”一节中的命令找回：把 `com.example.package` 换成 `com.amazon.appmanager`。它那一行在 `moto-more.txt` 里，所以 `./debloat.sh restore moto-more.txt` 也会把它找回来。PayJoy 没有用 `pm` 隐藏，所以任何命令都找不回它：请移除模块 Hide PayJoy Access app（APatch → APM → Remove），然后重启手机。应用文件夹会重新可见，Android 会在开机时找到这个包。它会以什么状态回来，我没有检查过。
 
 **查看现在隐藏了什么（在电脑上）**
 
