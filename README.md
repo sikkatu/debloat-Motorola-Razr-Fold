@@ -1,5 +1,4 @@
 # Razr Fold: a clean main profile, Google only in a dedicated profile (English version)
-
 > **Languages:** **English** (this document) · [Русский](README.ru.md) · [中文](README.zh.md)
 >
 > **License:** [CC BY-ND 4.0](LICENSE) — you may copy, share, fork and print this guide for free, but only in full and unchanged, keeping the author and the contact details (GitHub and Telegram links) intact. Editing the text is not allowed.
@@ -313,7 +312,7 @@ If a package looks like junk but is not in the lists below, do not touch it. Fir
 
 | What | Example names | What will break |
 | --- | --- | --- |
-| Android core | everything that starts with `com.android.`, and the `android` package itself. Exceptions: `com.android.vending`, `com.android.chrome` and two `com.android.hotwordenrollment.*` packages (voice training for “OK Google”); they are named in the lists | Booting, calls, Bluetooth, NFC, settings, the interface |
+| Android core | everything that starts with `com.android.`, and the `android` package itself. Exceptions: `com.android.vending`, `com.android.chrome`, `com.android.traceur` (System Tracing, a tool for developers) and two `com.android.hotwordenrollment.*` packages (voice training for “OK Google”); they are named in the lists | Booting, calls, Bluetooth, NFC, settings, the interface |
 | Google Mainline modules | any `com.google.android.*` that are not in your lists: `permissioncontroller`, `packageinstaller`, `documentsui`, `ext.services`, `networkstack`, `cellbroadcastreceiver`, `tethering`, `conscrypt` | Permissions, installing apps, files, network, emergency alerts |
 | WebView | `com.google.android.webview`, `com.android.webview`, `com.google.android.trichromelibrary` | Pages inside apps will stop opening |
 | Qualcomm | `com.qualcomm.*`, `com.qti.*`, `vendor.qti.*`, `org.codeaurora.*` | Modem, GPS, Wi-Fi, sound |
@@ -578,7 +577,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-If a line says `Failure: package is non-disable` instead of `Success`, the package is protected by the system. Skip it for now: the package stays on the phone, and nothing else breaks. Such packages can be removed only with the same trick as Gboard in Step 6. For Amazon App Manager and PayJoy it is written out in Step 6a, for other packages it is not.
+If a line says `Failure: package is non-disable` instead of `Success`, the package is protected by the system. Skip it for now: the package stays on the phone, and nothing else breaks. Such packages can be removed only with the same trick as Gboard in Step 6. For Amazon App Manager, PayJoy and the T-Mobile RSU packages it is written out in Step 6a, for other packages it is not.
 
 After the reboot, check on the phone:
 
@@ -693,17 +692,17 @@ The `com.motorola.gesture` package is not included either. It is not described i
 In Step 2 you saved the list of all packages (`baseline_before.txt`): it has 533 lines. The lists of Steps 4–7 already contain 55 of these packages. I went through the rest one by one. The result:
 
 - 171 overlays (the file path contains `/overlay/`) and 30 APEX modules. We do not touch them: see the section “What you must not remove”.
-- 277 individual packages: we remove 75 with the lists of this step, 9 more lines are written into the lists as disabled (they start with `#`), and we keep 193. What exactly and why is written in the table at the end of the step.
+- 277 individual packages: we remove 78 with the lists of this step, 9 more lines are written into the lists as disabled (they start with `#`), and we keep 190. What exactly and why is written in the table at the end of the step.
 
 **How to read the new lists.** A line looks like this: `package  # name: what it does`. If there is no mark at the end of the comment, the purpose of the package is described in open sources. An asterisk `*` means that the package is not described in open sources, and its purpose is clear from the lists, the APK name or a neighboring package. A line with `#` at the start is disabled, and the script skips it; a `?` sign in such a line means that I do not know what the package does. If you want to remove a disabled package, delete the ` #  ` at the start of the line and repeat the removal.
 
 As in Steps 4–7, the commands remove packages only in the main profile (`--user 0`). In the “Google” profile they stay. The Shelter work profile is cleaned in Step 11: the new lists are added there too.
 
-**1. Google leftovers: 13 packages (on the PC)**
+**1. Google leftovers: 16 packages (on the PC)**
 
-What is inside: the Google Fi app (`apps.tycho`) and auto-connect to carriers' Wi-Fi (`carrierwifi`); first-setup service packages (`partnersetup`, `onetimeinitializer`, `searchselector`); sending of error reports (`feedback`); Android Device Policy (`clouddpc`); Android AICore, the Gemini Nano AI model service (`aicore`; this is not the Moto AICore from item 6 of Step 5); ARCore, augmented reality (`ar.core`); Cross-device services (`ambient.streaming`); the Quick Share extension (`mosey`); two packages of voice training for “OK Google” (`hotwordenrollment`).
+What is inside: the Google Fi app (`apps.tycho`) and auto-connect to carriers' Wi-Fi (`carrierwifi`); first-setup service packages (`partnersetup`, `onetimeinitializer`, `searchselector`); sending of error reports (`feedback`); Android Device Policy (`clouddpc`); Android AICore, the Gemini Nano AI model service (`aicore`; this is not the Moto AICore from item 6 of Step 5); ARCore, augmented reality (`ar.core`); Cross-device services (`ambient.streaming`); the Quick Share extension (`mosey`); two packages of voice training for “OK Google” (`hotwordenrollment`); Android Switch, copying data from another phone at the first setup (`apps.restore`); Switch Access, control with switches or the front camera (`accessibility.switchaccess`); System Tracing, a tool for developers (`traceur`).
 
-What may stop working in the main profile: apps with augmented reality, casting apps to a Chromebook, the AI features of apps on Android AICore, Quick Share, voice training for “OK Google”. Without the Google services from Step 7, much of this did not work in the main profile anyway. Android Device Policy is needed only by someone whose phone is managed by an organization (a work account with a device policy): if that is you, delete its line.
+What may stop working in the main profile: apps with augmented reality, casting apps to a Chromebook, the AI features of apps on Android AICore, Quick Share, voice training for “OK Google”, copying data from another phone at the first setup, control with switches or the front camera, recording system traces from Developer options. Without the Google services from Step 7, much of this did not work in the main profile anyway. Android Device Policy is needed only by someone whose phone is managed by an organization (a work account with a device policy): if that is you, delete its line.
 
 Two lines at the end of the list are disabled: `com.google.android.as` (Android System Intelligence: Live Caption, Live Translate, smart auto-rotate) and `com.google.android.as.oss` (Private Compute Services, private analytics for it). If you remove them, these functions will disappear, and what else in Moto depends on them I do not know. Remove them only together.
 
@@ -727,6 +726,9 @@ com.google.android.apps.carrier.carrierwifi  # Google Wi-Fi Provisioner: auto-co
 com.google.android.apps.setupwizard.searchselector  # Search engine choice during the first setup *
 com.android.hotwordenrollment.okgoogle  # Voice training for “OK Google” *
 com.android.hotwordenrollment.xgoogle  # Voice training for “OK Google” *
+com.google.android.apps.restore  # Android Switch: copying data from another phone during the first setup
+com.google.android.accessibility.switchaccess  # Switch Access: controlling the phone with switches or the front camera
+com.android.traceur  # System Tracing: recording system traces from Developer options, a tool for developers
 # com.google.android.as  # Android System Intelligence: Live Caption, Live Translate, smart auto-rotate. Disabled: these functions will disappear, and I do not know what else in Moto depends on it. Remove together with as.oss
 # com.google.android.as.oss  # Private Compute Services: private analytics and training for Android System Intelligence, according to Google's description. Disabled for the same reason. Remove together with as
 EOF
@@ -854,6 +856,8 @@ adb shell svc power reboot
 
 The answers are the same as in Step 4: `Success` means that the package is removed, “not on the phone or already removed, skipping” means that you do not have such a package. If you do not have the carrier list, the script will say that it did not find the file: this is normal. If a line says `Failure: package is non-disable` instead of `Success`, skip this package, as in item 4 of Step 5. On the Razr Fold two lines come out like this. `com.amazon.appmanager` answers `Failure: package is non-disable`: Motorola protected it. `com.payjoy.access` prints a long error text (a Java trace) with the line `java.lang.IllegalArgumentException: Invalid argument`: the system does not allow removing it either. In both cases the package stays on the phone for now, and the script goes on to the next line. Both packages are removed in Step 6a; until then the check in item 5 prints them too. The pause `sleep 20` and the normal reboot are needed for the same reason as in Step 4.
 
+If you use the carrier list, three more lines come out like this on the Razr Fold: `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` and `com.tmobile.rsuapp` answer `Failure: package is non-disable`. They are removed in Step 6a; until then the check in item 5 prints them too.
+
 **5. Check that the packages are removed (on the PC)**
 
 The command should print nothing:
@@ -885,13 +889,13 @@ Bring back a single package with the command from the “Rollback” section. Th
 
 **What I kept and why**
 
-Of the 277 packages I went through, 193 stay. The overlays and APEX modules are added to the table for completeness.
+Of the 277 packages I went through, 190 stay. The overlays and APEX modules are added to the table for completeness.
 
 | Group | How many | What is inside and why I kept it |
 | --- | --- | --- |
 | Overlays | 171 | They adapt the system to the screens, the carrier and the theme. Must not be removed. |
 | APEX modules | 30 | Parts of Android that are updated separately (Bluetooth, emergency alerts and others). Must not be removed. |
-| Android core | 67 | Everything called `android` or `com.android.*`: contacts, the SIM menu, printing, data providers and so on. The rule from the section “What you must not remove”. |
+| Android core | 66 | Everything called `android` or `com.android.*`: contacts, the SIM menu, printing, data providers and so on. The rule from the section “What you must not remove”. |
 | Qualcomm | 29 | `com.qualcomm.*`, `com.qti.*`, `vendor.qti.*`, `org.codeaurora.ims`: modem, GPS, Wi-Fi, sound. |
 | Google modules for the system | 11 | `packageinstaller`, `documentsui`, `networkstack`, `captiveportallogin`, `ext.shared`, `modulemetadata`, `mainline.adservices`, `mainline.telemetry`, `configupdater`, `webview`, `carrier`. Installing apps, files, network, WebView, settings updates. |
 | Moto core | 14 | `launcher3`, `launcherconfig`, `camera5`, `camera.ai.colortone`, `faceunlock`, `batterycare`, `coresettingsext`, `providers.chromehomepage`, `providers.settings`, `systemserver`, `hce`, `thermalservice`, `ccc.devicemanagement`, `ccc.ota`. The home screen, camera, face unlock, battery, settings, updates and device management. |
@@ -900,7 +904,7 @@ Of the 277 packages I went through, 193 stay. The overlays and APEX modules are 
 | Moto features | 23 | `actions`, `actioncore`, `touchshare`, `smartmode`, `deptheffect`, `easyprefix`, `dynamicvolume`, `dolbyvisionservice`, `dolby.dolbyui`, `daxservice`, `clockface`, `personalize`, `activestylus`, `mykey`, `smart5g`, `sstservice`, `aptxmode`, `motosignature`, `motosignature2`, `appdirectedsmsproxy`, `iotservice`, `account`, `gesture`. Moto gestures and actions, sound, the stylus, Moto Buds, 5G. Dolby was kept based on the author's check: it showed no internet access for it. |
 | First setup and data transfer | 6 | `setup`, `setupwizard.controller`, `setupwizard.devicesetup`, `setupwizard.phoneservice`, `migrateassist`, `motomigrate`. They will be needed after a phone reset. |
 | Telephony | 10 | `entitlement`, `omadm.service`, `carrierconfig`, `carriersettingsext`, `visualvoicemail`, `android.provisioning`, `euiccpartnerapp`, `callredirectionservice`, `msimsettings`, `rcsConfigService`. SIM, carrier settings, eSIM, voicemail, RCS. |
-| Google packages that I kept | 11 | Described below. |
+| Google packages that I kept | 9 | Described below. |
 
 **Google packages that I did not remove**
 
@@ -908,7 +912,7 @@ Of the 277 packages I went through, 193 stay. The overlays and APEX modules are 
 - `apps.turbo`: Device Health Services, battery life estimation. Without it, Settings → Battery [may show the message “Need to pack turbo apk”](https://github.com/ishacker003/turboproxy).
 - `apps.safetyhub`: [Personal Safety](https://sysapps.bayton.org/packages/com.google.android.apps.safetyhub), emergency functions such as Emergency SOS and sending the location to contacts (according to the app description). I did not touch it.
 - `apps.scone`: [Adaptive Connectivity Services](https://9to5google.com/2020/12/05/google-adaptive-connectivity-services/). Judging by its permissions in the [bayton database](https://sysapps.bayton.org/packages/com.google.android.apps.scone), it is related to the modem settings and metrics. I did not touch it.
-- `euicc` (eSIM support), `apps.restore` (data transfer at first setup), `apps.wallpaper` (wallpaper picker), `marvin.talkback`, `accessibility.switchaccess` and `tts` (accessibility and speech synthesis), `apps.wellbeing` (Digital Wellbeing): needed or useful functions with a small gain from removal.
+- `euicc` (eSIM support), `apps.wallpaper` (wallpaper picker), `marvin.talkback` and `tts` (accessibility and speech synthesis), `apps.wellbeing` (Digital Wellbeing): needed or useful functions with a small gain from removal.
 
 ## Step 6. Replace the dialer, SMS, keyboard and the rest
 
@@ -1106,7 +1110,7 @@ adb shell svc power reboot
 
 The `com.google.android.inputmethod.latin` line should now say `Success`, and the already removed packages answer “not on the phone or already removed”. After the reboot open any input field: the new keyboard should appear. If there is no keyboard at all, bring Gboard back with the command `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin`, wait 20 seconds, reboot the phone with the command `adb shell svc power reboot` and go back to items 3 and 4 of this step: the new keyboard must be turned on and be the main one, and the command `adb shell settings get secure default_input_method` must name it. Only then repeat 5g.
 
-**About the module.** While Gboard is removed, do not delete or turn off either the module or the metamodule: without the metamodule the module does not work, and I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. If after a firmware update Gboard again says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, the file was named differently in the new firmware: repeat 5b–5f. If `non-disable` is reported by some other package, leave that package on the phone: the module from this step hides only the Gboard file. For Amazon App Manager and PayJoy see Step 6a. For any other package the `PATTERN` line from 5c would have to be changed, and this case is not covered here.
+**About the module.** While Gboard is removed, do not delete or turn off either the module or the metamodule: without the metamodule the module does not work, and I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. If after a firmware update Gboard again says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, the file was named differently in the new firmware: repeat 5b–5f. If `non-disable` is reported by some other package, leave that package on the phone: the module from this step hides only the Gboard file. For Amazon App Manager, PayJoy and the T-Mobile RSU packages see Step 6a. For any other package the `PATTERN` line from 5c would have to be changed, and this case is not covered here.
 
 **If the phone did not boot after installing the module or the metamodule.** This is unlikely: the module hides one file, and the metamodule only attaches module files. But if it did happen, turn on the APatch Safe mode: all modules are turned off in it, and in APM the “Remove” button works: remove what you installed last (the metamodule or the module). [APatch instructions](https://apatch.dev/rescue-bootloop.html): hold the power button until the screen lights up, then press and release it until the first screen appears. The heading of that page also mentions the volume “down” button, the number of presses is not specified, so the method may take several attempts. If it did not work, follow the section “If the phone does not boot” at the end.
 
@@ -1132,9 +1136,11 @@ adb shell cmd package install-existing --user 0 com.google.android.dialer
 
 A restored dialer should not interfere: while Fossify Phone is the default dialer, ordinary calls go through it, and the system one is needed only for the emergency call. This is from my knowledge and was not checked on your phone.
 
-## Step 6a. Two more protected packages: Amazon App Manager and PayJoy
+## Step 6a. Other protected packages: Amazon App Manager, PayJoy and T-Mobile RSU
 
-After Step 5a two packages from `moto-more.txt` stay on the phone: `com.amazon.appmanager` (the answer is `Failure: package is non-disable`) and `com.payjoy.access` (a long Java error with the line `IllegalArgumentException: Invalid argument`). They are protected in two different ways, so each one gets its own module. Both modules work only through the metamodule: if you have not installed it yet, do 5d first and then come back here. The steps repeat the ones from Step 6: build the module, install it, reboot, check. Checked on the Razr Fold: after the first module and a reboot the line `com.amazon.appmanager` answered `Success`, and after the second module and a reboot PayJoy disappeared from the package list of the main profile.
+After Step 5a two packages from `moto-more.txt` stay on the phone: `com.amazon.appmanager` (the answer is `Failure: package is non-disable`) and `com.payjoy.access` (a long Java error with the line `IllegalArgumentException: Invalid argument`). They are protected in two different ways, so each one gets its own module. All the modules of this step work only through the metamodule: if you have not installed it yet, do 5d first and then come back here. The steps repeat the ones from Step 6: build the module, install it, reboot, check. Checked on the Razr Fold: after the first module and a reboot the line `com.amazon.appmanager` answered `Success`, and after the second module and a reboot PayJoy disappeared from the package list of the main profile.
+
+If you also used the carrier list, three more packages can stay on the phone with the answer `non-disable`: `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` and `com.tmobile.rsuapp` (T-Mobile RSU). They are protected the same way as Amazon App Manager and have their own module: 6a-7 and 6a-8, the last two items of this step.
 
 If at any step the answer is not what is written, stop and do not go to the next one: the modules delete nothing, and a module can be removed in APatch (APM → Remove).
 
@@ -1296,7 +1302,79 @@ adb shell "ls /product/priv-app | grep -i payjoy"
 
 The first command should print only `package:com.motorola.android.overlay.payjoy`, the second nothing. The overlay stays: it is a resource without code, and the removal script does not touch overlays. If the package of the app is still in the list, the module did not take effect: look in APM (the red notice about the metamodule must not be there, the module must be in the list and enabled), repeat the installation and the reboot. If it still stays, remove the module (APM → Remove) and reboot the phone: PayJoy stays on it, turned off by the system.
 
-**About the two modules.** While the packages are removed, do not delete or turn off these modules or the metamodule. For Amazon App Manager the reason is the same as for Gboard: I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. PayJoy simply comes back together with its folder when its module is removed. I checked only the Razr Fold: the phone booted normally after both modules, and how other firmware versions react to the missing PayJoy package I do not know. What to do after a system update is written in Step 10. If the phone did not boot after installing a module, turn on the APatch Safe mode as described in Step 6 (“If the phone did not boot after installing the module or the metamodule”) and remove the module you installed last.
+**6a-7. T-Mobile RSU: build the module (on the PC)**
+
+This item and the next one are needed only if you used the carrier list in Step 5a and its three T-Mobile RSU lines (`com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv`, `com.tmobile.rsuapp`) answered `Failure: package is non-disable`. If they said `Success` or “not on the phone or already removed, skipping”, skip 6a-7 and 6a-8. The protection is the same as for Gboard and Amazon App Manager: files in the `nondisable` folders. The module does not look for these files by a fixed name: it hides every file in the `nondisable` folders whose name or text contains `com.tmobile.rsu`. Nothing is deleted. Copy the block whole:
+
+```
+cd ~/razr-debloat
+mkdir -p rsu-module
+cd rsu-module
+cat > module.prop <<'EOF'
+id=unprotect_tmobile_rsu
+name=Unprotect T-Mobile RSU packages (Motorola nondisable)
+version=1.0
+versionCode=1
+author=local
+description=Hides the Motorola nondisable markers of the T-Mobile RSU packages so that pm uninstall --user 0 works
+EOF
+cat > customize.sh <<'EOF'
+# Hides the Motorola protection files (nondisable) of the T-Mobile RSU packages from the system.
+# Deletes nothing. A file is hidden if its name or its text contains the key below.
+# The key covers com.tmobile.rsuadapter.qualcomm, com.tmobile.rsusrv and com.tmobile.rsuapp.
+KEY='com.tmobile.rsu'
+
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  if [ "$PART" = system ]; then
+    SRC=/system/etc/nondisable
+    DST=$MODPATH/system/etc/nondisable
+  else
+    SRC=/$PART/etc/nondisable
+    DST=$MODPATH/system/$PART/etc/nondisable
+  fi
+  [ -d "$SRC" ] || continue
+  for F in "$SRC"/*; do
+    [ -f "$F" ] || continue
+    HIT=0
+    case "${F##*/}" in
+      *"$KEY"*) HIT=1 ;;
+    esac
+    if [ "$HIT" = 0 ] && grep -qF "$KEY" "$F" 2>/dev/null; then HIT=1; fi
+    [ "$HIT" = 1 ] || continue
+    mkdir -p "$DST"
+    mknod "$DST/${F##*/}" c 0 0
+    [ -c "$DST/${F##*/}" ] || abort "! mknod failed for $DST/${F##*/}"
+    ui_print "- Hiding marker: $F"
+    FOUND=1
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No marker file mentions $KEY in /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../unprotect-rsu.zip module.prop customize.sh
+cd ..
+adb push unprotect-rsu.zip /sdcard/Download/
+```
+
+If `python3` is not found, replace the line with it by `zip ../unprotect-rsu.zip module.prop customize.sh`.
+
+**6a-8. T-Mobile RSU: install the module and remove the packages**
+
+On the phone: APatch → APM → the install button → choose `unprotect-rsu.zip` in the Download folder. In the installation log a line `- Hiding marker:` with a path should appear for every file found. If instead the log says `! No marker file mentions`, the module did not install: this is by design, there is nothing to hide, and the steps below do not fit. Then reboot the phone: with the button in the log or with the command `adb shell svc power reboot` on the PC.
+
+After the reboot remove the packages again (on the PC):
+
+```
+./debloat.sh remove carriers.txt
+sleep 20
+adb shell svc power reboot
+```
+
+The three lines `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` and `com.tmobile.rsuapp` should now say `Success`, and the packages removed earlier answer “not on the phone or already removed, skipping”. Checked on the Razr Fold: after this module and a reboot all three packages were removed. If a line still says `non-disable`, the module did not take effect: check the same things as in 5f (the red notice about the metamodule in APM, a module installed before the metamodule). If everything is in place, skip this package: it stays on the phone.
+
+**About the modules.** While the packages are removed, do not delete or turn off these modules or the metamodule. For Amazon App Manager and the T-Mobile RSU packages the reason is the same as for Gboard: I did not check whether Motorola will bring the protected package back by itself when the file becomes visible again. PayJoy simply comes back together with its folder when its module is removed. I checked only the Razr Fold: the phone booted normally after all the modules, and how other firmware versions react to the missing PayJoy package I do not know. What to do after a system update is written in Step 10. If the phone did not boot after installing a module, turn on the APatch Safe mode as described in Step 6 (“If the phone did not boot after installing the module or the metamodule”) and remove the module you installed last.
 
 ## Step 7. Remove Google services from the main profile
 
@@ -1472,7 +1550,8 @@ EOF
 chmod +x ~/.shortcuts/google-on.sh ~/.shortcuts/google-off.sh
 ```
 
-3. Long-press an empty place on the home screen → Widgets → Termux:Widget, and place the widget. Tap `google-on` to switch to the “Google” profile.
+3. Allow Termux to open its window from the home screen: Settings → Apps → Termux → Advanced → Display over other apps → allow (or Settings → Apps → Special app access → Display over other apps). Without it, a tap on a button only shows the message “Termux requires "Display over other apps" permission to start terminal sessions from background…”, and the script does not start.
+4. Long-press an empty place on the home screen → Widgets → Termux:Widget, and place the widget. Tap `google-on` to switch to the “Google” profile.
 
 The `google-off` script works only from the main profile. If the auto-stop from item 1 works, it is almost not needed.
 
@@ -1547,7 +1626,7 @@ For now we skip updates. When you get to them, take the following into account.
 
 **The Gboard protection module and the metamodule.** They are in `/data/adb/modules`, a system update does not touch `/data`, but the module works only while APatch is active, that is, after the boot is patched again. If when running the lists again Gboard says `non-disable`, open APatch → APM: the red notice about the metamodule should not be there (if it is, repeat 5d), and the module should be in the list and enabled. If everything is in place and the answer is the same, repeat 5b–5f from Step 6.
 
-**The modules from Step 6a.** They are in `/data/adb/modules` too and work under the same condition: only while APatch is active. If when running the lists again `com.amazon.appmanager` says `non-disable` or `com.payjoy.access` prints the Java error, the package has come back: open APatch → APM and check that the red notice about the metamodule is not there (if it is, repeat 5d) and that both modules are in the list and enabled. If everything is in place and the package is back anyway, the file or the folder was named differently in the new firmware: remove the module of that package (APM → Remove), reboot the phone and repeat its steps from Step 6a. I did not check this after a system update.
+**The modules from Step 6a.** They are in `/data/adb/modules` too and work under the same condition: only while APatch is active. If when running the lists again `com.amazon.appmanager` or one of the T-Mobile RSU packages says `non-disable`, or `com.payjoy.access` prints the Java error, the package has come back: open APatch → APM and check that the red notice about the metamodule is not there (if it is, repeat 5d) and that all the modules are in the list and enabled. If everything is in place and the package is back anyway, the file or the folder was named differently in the new firmware: remove the module of that package (APM → Remove), reboot the phone and repeat its steps from Step 6a. I did not check this after a system update.
 
 ## Step 11. The Shelter work profile: remove Moto and Google junk, as in the main profile
 
@@ -1577,11 +1656,11 @@ The adb shell cannot enter the work profile: for commands with `--user 12` it an
 
 ```
 N=12
-{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" '$1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"removed: " $1 "\"" }' > profile-remove.sh
+{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" 'BEGIN { print "pm list users | grep -qF \"{" n ":\" || { echo \"no user " n ": check the number with pm list users\"; exit 1; }" } $1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"removed: " $1 "\"" }' > profile-remove.sh
 adb push profile-remove.sh /data/local/tmp/profile-remove.sh
 ```
 
-In the first line replace 12 with your own number. If you do not have some of the files, that is normal. The Google dialer and Moto Notes are added to the start of the list separately: in the main profile they were removed with their own commands (Steps 6 and 5). The `com.motorola.ccc.notification` package is removed in the profile as an ordinary one, as in Step 5; the script still skips the other `com.motorola.ccc.*`. The lists from Step 5a are connected the same way. The command silently skips packages that are not in the profile.
+In the first line replace 12 with your own number. The script begins with a check that a profile with this number exists: if there is none, it prints “no user 12: check the number with pm list users” and stops. If you do not have some of the files, that is normal. The Google dialer and Moto Notes are added to the start of the list separately: in the main profile they were removed with their own commands (Steps 6 and 5). The `com.motorola.ccc.notification` package is removed in the profile as an ordinary one, as in Step 5; the script still skips the other `com.motorola.ccc.*`. The lists from Step 5a are connected the same way. The command silently skips packages that are not in the profile.
 
 **4. Run the script (on the phone, in Termux)**
 
@@ -1589,15 +1668,15 @@ In the first line replace 12 with your own number. If you do not have some of th
 su -c 'sh /data/local/tmp/profile-remove.sh'
 ```
 
-For each removed package “removed: …” will be printed. The script silently skips packages that are not in the profile and packages that the system did not let it remove: the ones that remain will be shown by the check in item 5. If root works in adb on your phone (`adb shell su -c id` prints `uid=0(root)`), the same command can be run from the PC: `adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`.
+For each removed package “removed: …” will be printed. If “no user …” is printed instead, the profile number is wrong: repeat item 2 and build the script again. The script silently skips packages that are not in the profile and packages that the system did not let it remove: the ones that remain will be shown by the check in item 5. If root works in adb on your phone (`adb shell su -c id` prints `uid=0(root)`), the same command can be run from the PC: `adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`.
 
 **5. Check (on the phone, in Termux)**
 
 ```
-comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort) | grep -E 'google|motorola'
+comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort)
 ```
 
-The command shows the Google and Moto packages that are in the work profile but are no longer in the main one. It should print nothing. If something was printed, the script did not remove those packages: the system did not let it, or they were not in your lists. Leave them, the profile works with them. To see the reason, remove one package by hand (on the phone, in Termux): `su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`, with your profile number and the package name; the answer `Failure` will show the reason. Do not touch other Google system packages in the profile, for example `com.google.android.permissioncontroller` or `com.google.android.webview`. Then reboot the phone with the pause (item 6).
+The command shows the packages that are in the work profile but are not in the main one. It should print nothing, apart from the apps that you installed into the work profile yourself. If something else was printed, the script did not remove those packages: the system did not let it, or they were not in your lists. Leave them, the profile works with them. To see the reason, remove one package by hand (on the phone, in Termux): `su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`, with your profile number and the package name; the answer `Failure` will show the reason. Do not touch other Google system packages in the profile, for example `com.google.android.permissioncontroller` or `com.google.android.webview`. Then reboot the phone with the pause (item 6).
 
 **6. Reboot the phone with the pause (on the PC)**
 
@@ -1924,9 +2003,11 @@ adb shell svc power reboot
 
 If you also want to remove the protection module from Step 6, first bring Gboard back with this command, then remove the module: APatch → APM → Remove, and reboot the phone. I did not check what the system does with an already removed package when its protection comes back, so this is the order. It is better to leave the metamodule in place: without it, the files of the other modules will stop being attached too.
 
-**Bring back Amazon App Manager and PayJoy (on the PC and on the phone)**
+**Bring back Amazon App Manager, PayJoy and T-Mobile RSU (on the PC and on the phone)**
 
 Amazon App Manager is brought back with the command from the “Bring back a single package” section: substitute `com.amazon.appmanager` for `com.example.package`. Its line is in `moto-more.txt`, so `./debloat.sh restore moto-more.txt` brings it back too. PayJoy was not hidden with `pm`, so no command brings it back: remove the module Hide PayJoy Access app (APatch → APM → Remove) and reboot the phone. The app folder becomes visible again, and Android finds the package at boot. I did not check in what state it comes back.
+
+The three T-Mobile RSU packages are brought back in the same way: with the command from the “Bring back a single package” section, or with `./debloat.sh restore carriers.txt` (their lines are in that list, and the command brings back the whole list).
 
 **See what is hidden now (on the PC)**
 

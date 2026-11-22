@@ -1,5 +1,4 @@
 # Razr Fold：主用户保持干净，Google 只放在专用用户中（中文版）
-
 > **语言：** [English](README.md) · [Русский](README.ru.md) · **中文**（本文档）
 >
 > **许可协议：** [CC BY-ND 4.0](LICENSE) — 你可以免费复制、传播、复刻和打印本指南，但必须完整且未经修改，并保留作者和联系方式（GitHub 与 Telegram 链接）。不允许修改文本。
@@ -313,7 +312,7 @@ Users:
 
 | 是什么 | 示例名称 | 会出什么问题 |
 | --- | --- | --- |
-| Android 核心 | 所有以 `com.android.` 开头的包，以及 `android` 包本身。例外：`com.android.vending`、`com.android.chrome` 和两个 `com.android.hotwordenrollment.*` 包（“OK Google”语音训练）；它们在清单里点了名 | 启动、通话、蓝牙、NFC、设置、界面 |
+| Android 核心 | 所有以 `com.android.` 开头的包，以及 `android` 包本身。例外：`com.android.vending`、`com.android.chrome`、`com.android.traceur`（System Tracing，开发者工具）和两个 `com.android.hotwordenrollment.*` 包（“OK Google”语音训练）；它们在清单里点了名 | 启动、通话、蓝牙、NFC、设置、界面 |
 | Google Mainline 模块 | 所有不在你的清单里的 `com.google.android.*`：`permissioncontroller`、`packageinstaller`、`documentsui`、`ext.services`、`networkstack`、`cellbroadcastreceiver`、`tethering`、`conscrypt` | 权限、安装应用、文件、网络、紧急警报 |
 | WebView | `com.google.android.webview`、`com.android.webview`、`com.google.android.trichromelibrary` | 应用内的网页将无法打开 |
 | Qualcomm | `com.qualcomm.*`、`com.qti.*`、`vendor.qti.*`、`org.codeaurora.*` | 基带、GPS、Wi-Fi、声音 |
@@ -578,7 +577,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，说明该包受到系统保护。请先跳过它：这个包会留在手机上，其他东西不会因此出问题。这类包只能用与步骤 6 中 Gboard 相同的办法移除。对 Amazon App Manager 和 PayJoy，这个办法写在步骤 6a 中；对其他的包，本指南没有写。
+如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，说明该包受到系统保护。请先跳过它：这个包会留在手机上，其他东西不会因此出问题。这类包只能用与步骤 6 中 Gboard 相同的办法移除。对 Amazon App Manager、PayJoy 和 T-Mobile RSU 的包，这个办法写在步骤 6a 中；对其他的包，本指南没有写。
 
 重启之后，在手机上检查：
 
@@ -693,17 +692,17 @@ adb shell svc power reboot
 在步骤 2 中，你保存了所有包的清单（`baseline_before.txt`）：共 533 行。步骤 4–7 的清单已经包含了其中的 55 个包。其余的我逐个过了一遍。结果如下：
 
 - 171 个 overlay（文件路径中包含 `/overlay/`）和 30 个 APEX 模块。我们不碰它们：见“不能移除的内容”一节。
-- 277 个单独的包：用本步骤的清单移除其中 75 个，另有 9 行以禁用状态写入清单（行首是 `#`），其余 193 个保留。具体是哪些、为什么，写在本步骤末尾的表格里。
+- 277 个单独的包：用本步骤的清单移除其中 78 个，另有 9 行以禁用状态写入清单（行首是 `#`），其余 190 个保留。具体是哪些、为什么，写在本步骤末尾的表格里。
 
 **如何阅读新清单。** 每行的格式是：`包名  # 名称：作用`。如果注释末尾没有标记，说明这个包的用途在公开资料中有描述。星号 `*` 表示这个包在公开资料中没有描述，其用途是根据清单、APK 名称或相邻的包推断出来的。行首带 `#` 的行是禁用的，脚本会跳过它；这样的行里出现问号 `?`，表示我不知道这个包是做什么的。如果你想移除某个被禁用的包，请删掉行首的 `#`，然后重复移除。
 
 与步骤 4–7 一样，这些命令只在主用户（`--user 0`）中移除包。在“Google”用户中它们会保留。Shelter 工作资料在步骤 11 中清理：新清单也会加到那里。
 
-**1. Google 的残留：13 个包（在电脑上）**
+**1. Google 的残留：16 个包（在电脑上）**
 
-里面有：Google Fi 应用（`apps.tycho`）和自动连接运营商 Wi-Fi 的功能（`carrierwifi`）；首次设置的服务包（`partnersetup`、`onetimeinitializer`、`searchselector`）；发送错误报告的功能（`feedback`）；Android Device Policy（`clouddpc`）；Android AICore，即 Gemini Nano AI 模型服务（`aicore`；这不是步骤 5 第 6 项中的 Moto AICore）；ARCore，即增强现实（`ar.core`）；跨设备服务（`ambient.streaming`）；Quick Share 扩展（`mosey`）；两个“OK Google”语音训练包（`hotwordenrollment`）。
+里面有：Google Fi 应用（`apps.tycho`）和自动连接运营商 Wi-Fi 的功能（`carrierwifi`）；首次设置的服务包（`partnersetup`、`onetimeinitializer`、`searchselector`）；发送错误报告的功能（`feedback`）；Android Device Policy（`clouddpc`）；Android AICore，即 Gemini Nano AI 模型服务（`aicore`；这不是步骤 5 第 6 项中的 Moto AICore）；ARCore，即增强现实（`ar.core`）；跨设备服务（`ambient.streaming`）；Quick Share 扩展（`mosey`）；两个“OK Google”语音训练包（`hotwordenrollment`）；Android Switch，首次设置时从另一部手机复制数据（`apps.restore`）；Switch Access，用开关或前置摄像头控制手机（`accessibility.switchaccess`）；System Tracing，开发者工具（`traceur`）。
 
-主用户中可能不再工作的功能：带增强现实的应用、向 Chromebook 投屏的应用、基于 Android AICore 的应用 AI 功能、Quick Share、“OK Google”语音训练。没有步骤 7 中的 Google 服务，这些功能在主用户中本来也大多无法使用。只有手机由组织管理（带有设备策略的工作账号）的人才需要 Android Device Policy：如果这就是你，请删掉它那一行。
+主用户中可能不再工作的功能：带增强现实的应用、向 Chromebook 投屏的应用、基于 Android AICore 的应用 AI 功能、Quick Share、“OK Google”语音训练、首次设置时从另一部手机复制数据、用开关或前置摄像头控制手机、从开发者选项录制系统跟踪。没有步骤 7 中的 Google 服务，这些功能在主用户中本来也大多无法使用。只有手机由组织管理（带有设备策略的工作账号）的人才需要 Android Device Policy：如果这就是你，请删掉它那一行。
 
 清单末尾有两行是禁用的：`com.google.android.as`（Android System Intelligence：实时字幕、实时翻译、智能自动旋转）和 `com.google.android.as.oss`（Private Compute Services，为它提供的私密分析服务）。如果移除它们，这些功能会消失，而 Moto 里还有什么依赖它们，我不知道。要移除就只能两个一起移除。
 
@@ -727,6 +726,9 @@ com.google.android.apps.carrier.carrierwifi  # Google Wi-Fi Provisioner：自动
 com.google.android.apps.setupwizard.searchselector  # 首次设置时选择搜索引擎 *
 com.android.hotwordenrollment.okgoogle  # “OK Google”语音训练 *
 com.android.hotwordenrollment.xgoogle  # “OK Google”语音训练 *
+com.google.android.apps.restore  # Android Switch：首次设置时从另一部手机复制数据
+com.google.android.accessibility.switchaccess  # Switch Access：用开关或前置摄像头控制手机
+com.android.traceur  # System Tracing：从开发者选项录制系统跟踪，开发者工具
 # com.google.android.as  # Android System Intelligence：实时字幕、实时翻译、智能自动旋转。已禁用：这些功能会消失，我也不知道 Moto 里还有什么依赖它。要移除就与 as.oss 一起移除
 # com.google.android.as.oss  # Private Compute Services：据 Google 的说明，是 Android System Intelligence 的私密分析和训练服务。出于同样的原因已禁用。要移除就与 as 一起移除
 EOF
@@ -854,6 +856,8 @@ adb shell svc power reboot
 
 脚本的回答与步骤 4 中相同：`Success` 表示该包已被移除，“手机上没有或已被移除，跳过”表示你的手机上没有这个包。如果你没有运营商清单，脚本会提示没有找到该文件：这是正常的。如果某一行显示的不是 `Success` 而是 `Failure: package is non-disable`，请像步骤 5 第 4 项那样跳过这个包。在 Razr Fold 上有两行是这样的结果。`com.amazon.appmanager` 回答 `Failure: package is non-disable`：Motorola 保护了它。`com.payjoy.access` 会打印一长段错误文字（Java 堆栈），其中有一行 `java.lang.IllegalArgumentException: Invalid argument`：系统同样不允许移除它。两种情况下，这个包暂时都会留在手机上，脚本会继续处理下一行。这两个包在步骤 6a 中移除；在那之前，第 5 项的检查也会把它们打印出来。`sleep 20` 的暂停和正常重启的原因与步骤 4 中相同。
 
+如果你用了运营商清单，在 Razr Fold 上还有三行是这样的结果：`com.tmobile.rsuadapter.qualcomm`、`com.tmobile.rsusrv` 和 `com.tmobile.rsuapp` 回答 `Failure: package is non-disable`。它们在步骤 6a 中移除；在那之前，第 5 项的检查也会把它们打印出来。
+
 **5. 检查这些包是否已被移除（在电脑上）**
 
 这条命令应该什么都不打印：
@@ -885,13 +889,13 @@ adb shell svc power reboot
 
 **我保留了什么，为什么**
 
-在我过了一遍的 277 个包中，193 个保留。overlay 和 APEX 模块是为了完整才加进表里的。
+在我过了一遍的 277 个包中，190 个保留。overlay 和 APEX 模块是为了完整才加进表里的。
 
 | 分组 | 数量 | 里面有什么，为什么保留 |
 | --- | --- | --- |
 | Overlay | 171 | 它们让系统适配屏幕、运营商和主题。不能移除。 |
 | APEX 模块 | 30 | Android 中单独更新的部分（蓝牙、紧急警报等）。不能移除。 |
-| Android 核心 | 67 | 所有名为 `android` 或 `com.android.*` 的包：联系人、SIM 卡菜单、打印、数据提供程序等。依据“不能移除的内容”一节中的规则。 |
+| Android 核心 | 66 | 所有名为 `android` 或 `com.android.*` 的包：联系人、SIM 卡菜单、打印、数据提供程序等。依据“不能移除的内容”一节中的规则。 |
 | Qualcomm | 29 | `com.qualcomm.*`、`com.qti.*`、`vendor.qti.*`、`org.codeaurora.ims`：基带、GPS、Wi-Fi、声音。 |
 | 系统用的 Google 模块 | 11 | `packageinstaller`、`documentsui`、`networkstack`、`captiveportallogin`、`ext.shared`、`modulemetadata`、`mainline.adservices`、`mainline.telemetry`、`configupdater`、`webview`、`carrier`。安装应用、文件、网络、WebView、设置更新。 |
 | Moto 核心 | 14 | `launcher3`、`launcherconfig`、`camera5`、`camera.ai.colortone`、`faceunlock`、`batterycare`、`coresettingsext`、`providers.chromehomepage`、`providers.settings`、`systemserver`、`hce`、`thermalservice`、`ccc.devicemanagement`、`ccc.ota`。主屏幕、相机、人脸解锁、电池、设置、更新和设备管理。 |
@@ -900,7 +904,7 @@ adb shell svc power reboot
 | Moto 功能 | 23 | `actions`、`actioncore`、`touchshare`、`smartmode`、`deptheffect`、`easyprefix`、`dynamicvolume`、`dolbyvisionservice`、`dolby.dolbyui`、`daxservice`、`clockface`、`personalize`、`activestylus`、`mykey`、`smart5g`、`sstservice`、`aptxmode`、`motosignature`、`motosignature2`、`appdirectedsmsproxy`、`iotservice`、`account`、`gesture`。Moto 手势和动作、声音、手写笔、Moto Buds、5G。Dolby 是根据作者的检查保留的：检查显示它没有联网权限。 |
 | 首次设置和数据迁移 | 6 | `setup`、`setupwizard.controller`、`setupwizard.devicesetup`、`setupwizard.phoneservice`、`migrateassist`、`motomigrate`。手机恢复出厂设置之后会用到它们。 |
 | 电话通信 | 10 | `entitlement`、`omadm.service`、`carrierconfig`、`carriersettingsext`、`visualvoicemail`、`android.provisioning`、`euiccpartnerapp`、`callredirectionservice`、`msimsettings`、`rcsConfigService`。SIM 卡、运营商设置、eSIM、语音信箱、RCS。 |
-| 我保留的 Google 包 | 11 | 见下文。 |
+| 我保留的 Google 包 | 9 | 见下文。 |
 
 **我没有移除的 Google 包**
 
@@ -908,7 +912,7 @@ adb shell svc power reboot
 - `apps.turbo`：Device Health Services，电池续航估算。没有它，设置 → 电池[可能会显示“Need to pack turbo apk”的消息](https://github.com/ishacker003/turboproxy)。
 - `apps.safetyhub`：[Personal Safety](https://sysapps.bayton.org/packages/com.google.android.apps.safetyhub)，紧急功能，例如紧急 SOS 和向联系人发送位置（根据应用说明）。我没有动它。
 - `apps.scone`：[Adaptive Connectivity Services](https://9to5google.com/2020/12/05/google-adaptive-connectivity-services/)。从它在 [bayton 数据库](https://sysapps.bayton.org/packages/com.google.android.apps.scone)中的权限来看，它与基带设置和指标有关。我没有动它。
-- `euicc`（eSIM 支持）、`apps.restore`（首次设置时的数据迁移）、`apps.wallpaper`（壁纸选择器）、`marvin.talkback`、`accessibility.switchaccess` 和 `tts`（无障碍和语音合成）、`apps.wellbeing`（Digital Wellbeing）：这些是需要或有用的功能，移除的收益很小。
+- `euicc`（eSIM 支持）、`apps.wallpaper`（壁纸选择器）、`marvin.talkback` 和 `tts`（无障碍和语音合成）、`apps.wellbeing`（Digital Wellbeing）：这些是需要或有用的功能，移除的收益很小。
 
 ## 步骤 6. 替换拨号器、短信、键盘等
 
@@ -1106,7 +1110,7 @@ adb shell svc power reboot
 
 现在 `com.google.android.inputmethod.latin` 这一行应该显示 `Success`，而已经被移除的包会回答“手机上没有或已被移除”。重启之后，打开任意输入框：新键盘应该会出现。如果根本没有键盘，请用命令 `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin` 把 Gboard 找回来，等待 20 秒，用命令 `adb shell svc power reboot` 重启手机，然后回到本步骤的第 3 项和第 4 项：新键盘必须是开启的并且是主键盘，命令 `adb shell settings get secure default_input_method` 的输出里必须是它。只有这样，才能再重复 5g。
 
-**关于这个模块。** 只要 Gboard 处于被移除状态，就不要删除或关闭这个模块，也不要删除或关闭元模块：没有元模块，模块就不起作用；而当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。如果固件更新之后 Gboard 又显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，说明新固件里文件的名称变了：请重复 5b–5f。如果是别的包显示 `non-disable`，就把这个包留在手机上：这一步的模块只隐藏 Gboard 的文件。Amazon App Manager 和 PayJoy 请看步骤 6a。对于其他任何包，就得修改 5c 中的 `PATTERN` 一行，而这里没有涉及这种情况。
+**关于这个模块。** 只要 Gboard 处于被移除状态，就不要删除或关闭这个模块，也不要删除或关闭元模块：没有元模块，模块就不起作用；而当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。如果固件更新之后 Gboard 又显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，说明新固件里文件的名称变了：请重复 5b–5f。如果是别的包显示 `non-disable`，就把这个包留在手机上：这一步的模块只隐藏 Gboard 的文件。Amazon App Manager、PayJoy 和 T-Mobile RSU 的包请看步骤 6a。对于其他任何包，就得修改 5c 中的 `PATTERN` 一行，而这里没有涉及这种情况。
 
 **如果安装模块或元模块之后手机无法启动。** 这种情况不太可能：模块只隐藏一个文件，元模块只负责挂载模块文件。但如果真的发生了，请开启 APatch 的安全模式：其中所有模块都会被关闭，而且在 APM 中“Remove”按钮可用：把你最后安装的那个（元模块或模块）移除。[APatch 的说明](https://apatch.dev/rescue-bootloop.html)：按住电源键直到屏幕亮起，然后按下再松开，直到出现第一个画面。那个页面的标题里还提到了音量“下”键，但没有写明按几次，所以这个方法可能需要尝试几次。如果没有成功，请按末尾“如果手机无法启动”一节操作。
 
@@ -1132,9 +1136,11 @@ adb shell cmd package install-existing --user 0 com.google.android.dialer
 
 找回来的拨号器应该不会碍事：只要 Fossify Phone 是默认拨号器，普通通话就都经过它，而系统拨号器只在紧急呼叫时才需要。这是我所知道的情况，没有在你的手机上检查过。
 
-## 步骤 6a. 另外两个受保护的包：Amazon App Manager 和 PayJoy
+## 步骤 6a. 其他受保护的包：Amazon App Manager、PayJoy 和 T-Mobile RSU
 
-做完步骤 5a 之后，手机上还剩两个来自 `moto-more.txt` 的包：`com.amazon.appmanager`（回答 `Failure: package is non-disable`）和 `com.payjoy.access`（一长段 Java 错误，其中有一行 `IllegalArgumentException: Invalid argument`）。它们受到两种不同方式的保护，所以各有一个模块。两个模块都只能通过元模块起作用：如果你还没有安装它，请先做 5d，然后再回到这里。这些步骤重复步骤 6：制作模块、安装、重启、检查。已在 Razr Fold 上检查过：第一个模块并重启之后，`com.amazon.appmanager` 这一行回答了 `Success`；第二个模块并重启之后，PayJoy 从主用户的包列表中消失了。
+做完步骤 5a 之后，手机上还剩两个来自 `moto-more.txt` 的包：`com.amazon.appmanager`（回答 `Failure: package is non-disable`）和 `com.payjoy.access`（一长段 Java 错误，其中有一行 `IllegalArgumentException: Invalid argument`）。它们受到两种不同方式的保护，所以各有一个模块。这一步的所有模块都只能通过元模块起作用：如果你还没有安装它，请先做 5d，然后再回到这里。这些步骤重复步骤 6：制作模块、安装、重启、检查。已在 Razr Fold 上检查过：第一个模块并重启之后，`com.amazon.appmanager` 这一行回答了 `Success`；第二个模块并重启之后，PayJoy 从主用户的包列表中消失了。
+
+如果你还用了运营商清单，手机上可能还会留下三个回答 `non-disable` 的包：`com.tmobile.rsuadapter.qualcomm`、`com.tmobile.rsusrv` 和 `com.tmobile.rsuapp`（T-Mobile RSU）。它们的保护方式和 Amazon App Manager 相同，并且有自己的模块：6a-7 和 6a-8，这一步的最后两项。
 
 如果在任何一步，回答与所写的不一致，请停下，不要进入下一步：模块什么都不删除，而且任何一个模块都可以在 APatch 里移除（APM → Remove）。
 
@@ -1296,7 +1302,79 @@ adb shell "ls /product/priv-app | grep -i payjoy"
 
 第一条命令应该只打印 `package:com.motorola.android.overlay.payjoy`，第二条什么都不打印。overlay 会留下：这是不带代码的资源，而移除脚本不会碰 overlay。如果应用本身的包还在列表里，说明模块没有生效：请看 APM（关于元模块的红色提示不应该出现，模块应该在列表里并且处于启用状态），重复安装和重启。如果还是一样，请移除模块（APM → Remove）并重启手机：PayJoy 会保持被系统关闭的状态。
 
-**关于这两个模块。** 只要这两个包处于被移除状态，就不要删除或关闭这两个模块和元模块。对 Amazon App Manager，原因和 Gboard 相同：当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。PayJoy 在它的模块被移除之后，会连同它的文件夹一起回来。我只在 Razr Fold 上检查过：装上两个模块之后手机正常启动了，而其他版本的固件会如何对待消失的 PayJoy 包，我不知道。系统更新之后该怎么办，写在步骤 10 中。如果安装模块之后手机无法启动，请开启 APatch 的安全模式，方法见步骤 6（“如果安装模块或元模块之后手机无法启动”），并移除你最后安装的那个模块。
+**6a-7. T-Mobile RSU：制作模块（在电脑上）**
+
+这一项和下一项只在以下情况需要：你在步骤 5a 中用了运营商清单，而且其中关于 T-Mobile RSU 的三行（`com.tmobile.rsuadapter.qualcomm`、`com.tmobile.rsusrv`、`com.tmobile.rsuapp`）回答了 `Failure: package is non-disable`。如果它们回答的是 `Success` 或“手机上没有或已被移除，跳过”，请跳过 6a-7 和 6a-8。保护方式和 Gboard、Amazon App Manager 相同：`nondisable` 文件夹里的文件。模块不按固定的文件名去找这些文件：它会隐藏 `nondisable` 文件夹中名称或文本里含有 `com.tmobile.rsu` 的所有文件。什么都不会被删除。请整块复制：
+
+```
+cd ~/razr-debloat
+mkdir -p rsu-module
+cd rsu-module
+cat > module.prop <<'EOF'
+id=unprotect_tmobile_rsu
+name=Unprotect T-Mobile RSU packages (Motorola nondisable)
+version=1.0
+versionCode=1
+author=local
+description=Hides the Motorola nondisable markers of the T-Mobile RSU packages so that pm uninstall --user 0 works
+EOF
+cat > customize.sh <<'EOF'
+# 对系统隐藏 T-Mobile RSU 三个包的 Motorola 保护文件（nondisable）。
+# 什么都不删除。如果文件的名称或文本中含有下面这个关键字，就把它隐藏。
+# 这个关键字对应 com.tmobile.rsuadapter.qualcomm、com.tmobile.rsusrv 和 com.tmobile.rsuapp。
+KEY='com.tmobile.rsu'
+
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  if [ "$PART" = system ]; then
+    SRC=/system/etc/nondisable
+    DST=$MODPATH/system/etc/nondisable
+  else
+    SRC=/$PART/etc/nondisable
+    DST=$MODPATH/system/$PART/etc/nondisable
+  fi
+  [ -d "$SRC" ] || continue
+  for F in "$SRC"/*; do
+    [ -f "$F" ] || continue
+    HIT=0
+    case "${F##*/}" in
+      *"$KEY"*) HIT=1 ;;
+    esac
+    if [ "$HIT" = 0 ] && grep -qF "$KEY" "$F" 2>/dev/null; then HIT=1; fi
+    [ "$HIT" = 1 ] || continue
+    mkdir -p "$DST"
+    mknod "$DST/${F##*/}" c 0 0
+    [ -c "$DST/${F##*/}" ] || abort "! mknod failed for $DST/${F##*/}"
+    ui_print "- Hiding marker: $F"
+    FOUND=1
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No marker file mentions $KEY in /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../unprotect-rsu.zip module.prop customize.sh
+cd ..
+adb push unprotect-rsu.zip /sdcard/Download/
+```
+
+如果找不到 `python3`，请把含有它的那一行替换为 `zip ../unprotect-rsu.zip module.prop customize.sh`。
+
+**6a-8. T-Mobile RSU：安装模块并移除这些包**
+
+在手机上：APatch → APM → 安装按钮 → 在 Download 文件夹中选择 `unprotect-rsu.zip`。安装日志中，每找到一个文件，就应该出现一行 `- Hiding marker:`，后面是路径。如果日志里显示的是 `! No marker file mentions`，说明模块没有装上：这是设计如此，没有可隐藏的东西，下面的步骤就不适用了。然后重启手机：用日志里的按钮，或用电脑上的命令 `adb shell svc power reboot`。
+
+重启之后，再移除一次这些包（在电脑上）：
+
+```
+./debloat.sh remove carriers.txt
+sleep 20
+adb shell svc power reboot
+```
+
+`com.tmobile.rsuadapter.qualcomm`、`com.tmobile.rsusrv` 和 `com.tmobile.rsuapp` 这三行现在应该显示 `Success`，而已经被移除的包会回答“手机上没有或已被移除，跳过”。已在 Razr Fold 上检查过：装上这个模块并重启之后，这三个包都被移除了。如果某一行仍然显示 `non-disable`，说明模块没有生效：请检查和 5f 中相同的东西（APM 里关于元模块的红色提示，以及模块是不是在元模块之前安装的）。如果一切都正常，就跳过这个包：它会留在手机上。
+
+**关于这些模块。** 只要这些包处于被移除状态，就不要删除或关闭这些模块和元模块。对 Amazon App Manager 和 T-Mobile RSU 的包，原因和 Gboard 相同：当文件重新变得可见时，Motorola 会不会自己把受保护的包找回来，我没有检查过。PayJoy 在它的模块被移除之后，会连同它的文件夹一起回来。我只在 Razr Fold 上检查过：装上这些模块之后手机正常启动了，而其他版本的固件会如何对待消失的 PayJoy 包，我不知道。系统更新之后该怎么办，写在步骤 10 中。如果安装模块之后手机无法启动，请开启 APatch 的安全模式，方法见步骤 6（“如果安装模块或元模块之后手机无法启动”），并移除你最后安装的那个模块。
 
 ## 步骤 7. 从主用户中移除 Google 服务
 
@@ -1472,7 +1550,8 @@ EOF
 chmod +x ~/.shortcuts/google-on.sh ~/.shortcuts/google-off.sh
 ```
 
-3. 长按主屏幕上的空白处 → 小部件 → Termux:Widget，并放置这个小部件。点 `google-on` 即可切换到“Google”用户。
+3. 允许 Termux 从主屏幕打开自己的窗口：设置 → 应用 → Termux → 高级 → 显示在其他应用的上层 → 允许（或 设置 → 应用 → 特殊应用权限 → 显示在其他应用的上层）。没有这个权限，点按钮只会弹出一条消息“Termux requires "Display over other apps" permission to start terminal sessions from background…”，脚本不会启动。
+4. 长按主屏幕上的空白处 → 小部件 → Termux:Widget，并放置这个小部件。点 `google-on` 即可切换到“Google”用户。
 
 `google-off` 脚本只能在主用户中使用。如果第 1 项中的自动停止已经生效，它几乎用不上。
 
@@ -1547,7 +1626,7 @@ echo 'com.example.newpackage  # 名称' >> moto.txt
 
 **Gboard 保护模块和元模块。** 它们在 `/data/adb/modules` 中，系统更新不会动 `/data`，但这个模块只有在 APatch 处于活动状态时才起作用，也就是 boot 重新打上补丁之后。如果重新运行清单时 Gboard 显示 `non-disable`，请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且模块应该在列表里并且处于启用状态。如果一切都正常，回答却还是一样，请重复步骤 6 中的 5b–5f。
 
-**步骤 6a 中的模块。** 它们同样在 `/data/adb/modules` 中，起作用的条件也相同：只有在 APatch 处于活动状态时。如果重新运行清单时 `com.amazon.appmanager` 显示 `non-disable`，或者 `com.payjoy.access` 打印出 Java 错误，说明这个包回来了：请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且两个模块都应该在列表里并且处于启用状态。如果一切都正常，这个包却还是回来了，说明新固件里文件或文件夹的名称变了：请移除这个包对应的模块（APM → Remove），重启手机，再重复它在步骤 6a 中的各步。系统更新之后我没有检查过这一点。
+**步骤 6a 中的模块。** 它们同样在 `/data/adb/modules` 中，起作用的条件也相同：只有在 APatch 处于活动状态时。如果重新运行清单时 `com.amazon.appmanager` 或某个 T-Mobile RSU 的包显示 `non-disable`，或者 `com.payjoy.access` 打印出 Java 错误，说明这个包回来了：请打开 APatch → APM：关于元模块的红色提示不应该出现（如果出现了，请重复 5d），而且所有模块都应该在列表里并且处于启用状态。如果一切都正常，这个包却还是回来了，说明新固件里文件或文件夹的名称变了：请移除这个包对应的模块（APM → Remove），重启手机，再重复它在步骤 6a 中的各步。系统更新之后我没有检查过这一点。
 
 ## 步骤 11. Shelter 工作资料：像主用户一样清除 Moto 和 Google 垃圾
 
@@ -1577,11 +1656,11 @@ adb shell 无法进入工作资料：对于带 `--user 12` 的命令，它会回
 
 ```
 N=12
-{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" '$1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"已移除: " $1 "\"" }' > profile-remove.sh
+{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" 'BEGIN { print "pm list users | grep -qF \"{" n ":\" || { echo \"没有 " n " 号用户：请用 pm list users 检查编号\"; exit 1; }" } $1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"已移除: " $1 "\"" }' > profile-remove.sh
 adb push profile-remove.sh /data/local/tmp/profile-remove.sh
 ```
 
-请在第一行把 12 换成你自己的编号。如果你缺少其中的某些文件，这是正常的。Google 拨号器和 Moto 的“笔记”是单独加在清单开头的：在主用户中它们是用各自的命令移除的（步骤 6 和步骤 5）。`com.motorola.ccc.notification` 这个包在工作资料中像步骤 5 那样，作为普通包被移除；脚本仍然会跳过其他的 `com.motorola.ccc.*`。步骤 5a 的清单也是以同样的方式接入的。这条命令会悄悄跳过不在工作资料里的包。
+请在第一行把 12 换成你自己的编号。脚本开头会检查是否存在这个编号的资料：如果没有，它会打印“没有 12 号用户：请用 pm list users 检查编号”，然后停止。如果你缺少其中的某些文件，这是正常的。Google 拨号器和 Moto 的“笔记”是单独加在清单开头的：在主用户中它们是用各自的命令移除的（步骤 6 和步骤 5）。`com.motorola.ccc.notification` 这个包在工作资料中像步骤 5 那样，作为普通包被移除；脚本仍然会跳过其他的 `com.motorola.ccc.*`。步骤 5a 的清单也是以同样的方式接入的。这条命令会悄悄跳过不在工作资料里的包。
 
 **4. 运行脚本（在手机上，在 Termux 中）**
 
@@ -1589,15 +1668,15 @@ adb push profile-remove.sh /data/local/tmp/profile-remove.sh
 su -c 'sh /data/local/tmp/profile-remove.sh'
 ```
 
-每移除一个包，都会打印一行“已移除: …”。脚本会悄悄跳过不在工作资料里的包，以及系统不允许它移除的包：还留着的那些包，会由第 5 项中的检查显示出来。如果你的手机上 root 在 adb 中可用（`adb shell su -c id` 打印 `uid=0(root)`），同样的命令也可以在电脑上运行：`adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`。
+每移除一个包，都会打印一行“已移除: …”。如果打印的是“没有 … 号用户”，说明资料编号不对：重复第 2 项，重新生成脚本。脚本会悄悄跳过不在工作资料里的包，以及系统不允许它移除的包：还留着的那些包，会由第 5 项中的检查显示出来。如果你的手机上 root 在 adb 中可用（`adb shell su -c id` 打印 `uid=0(root)`），同样的命令也可以在电脑上运行：`adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`。
 
 **5. 检查（在手机上，在 Termux 中）**
 
 ```
-comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort) | grep -E 'google|motorola'
+comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort)
 ```
 
-这条命令会显示出现在工作资料里、但主用户里已经没有的 Google 和 Moto 包。它应该什么都不打印。如果打印出了什么，说明脚本没有移除这些包：要么系统不允许，要么它们不在你的清单里。不用管它们，工作资料带着它们也能正常使用。想看原因，可以手动移除其中一个包（在手机上，在 Termux 中）：`su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`，把 12 换成你自己的编号，把 PACKAGE\_NAME 换成包名；回答 `Failure` 会显示原因。不要动工作资料里其他的 Google 系统包，例如 `com.google.android.permissioncontroller` 或 `com.google.android.webview`。然后带暂停地重启手机（第 6 项）。
+这条命令会显示出现在工作资料里、但主用户里没有的包。它应该什么都不打印，只有你自己装进工作资料的应用除外。如果还打印出了别的，说明脚本没有移除这些包：要么系统不允许，要么它们不在你的清单里。不用管它们，工作资料带着它们也能正常使用。想看原因，可以手动移除其中一个包（在手机上，在 Termux 中）：`su -c 'pm uninstall -k --user 12 PACKAGE_NAME'`，把 12 换成你自己的编号，把 PACKAGE\_NAME 换成包名；回答 `Failure` 会显示原因。不要动工作资料里其他的 Google 系统包，例如 `com.google.android.permissioncontroller` 或 `com.google.android.webview`。然后带暂停地重启手机（第 6 项）。
 
 **6. 带暂停地重启手机（在电脑上）**
 
@@ -1923,9 +2002,11 @@ adb shell svc power reboot
 
 如果你还想移除步骤 6 中的保护模块，请先用这条命令把 Gboard 找回来，再移除模块：APatch → APM → Remove，然后重启手机。我没有检查过，当一个已被移除的包的保护重新生效时，系统会怎么处理它，所以才按这个顺序。最好把元模块留在原处：没有它，其他模块的文件也不会再被挂载。
 
-**把 Amazon App Manager 和 PayJoy 找回来（在电脑和手机上）**
+**把 Amazon App Manager、PayJoy 和 T-Mobile RSU 找回来（在电脑和手机上）**
 
 Amazon App Manager 用“把单个包找回来”一节中的命令找回：把 `com.example.package` 换成 `com.amazon.appmanager`。它那一行在 `moto-more.txt` 里，所以 `./debloat.sh restore moto-more.txt` 也会把它找回来。PayJoy 没有用 `pm` 隐藏，所以任何命令都找不回它：请移除模块 Hide PayJoy Access app（APatch → APM → Remove），然后重启手机。应用文件夹会重新可见，Android 会在开机时找到这个包。它会以什么状态回来，我没有检查过。
+
+T-Mobile RSU 的三个包用同样的办法找回来：用“把单个包找回来”一节中的命令，或者用 `./debloat.sh restore carriers.txt`（它们的行在这个清单里，这条命令会把整个清单都找回来）。
 
 **查看现在隐藏了什么（在电脑上）**
 

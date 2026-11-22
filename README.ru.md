@@ -1,5 +1,4 @@
 # Razr Fold: чистый основной профиль, Google только в спецпрофиле
-
 > **Языки:** [English](README.md) · **Русский** (этот документ) · [中文](README.zh.md)
 >
 > **Лицензия:** [CC BY-ND 4.0](LICENSE) — инструкцию можно бесплатно копировать, распространять, форкать и печатать, но только целиком и без изменений, сохраняя автора и контактные данные (ссылки на GitHub и Telegram). Изменять текст нельзя.
@@ -313,7 +312,7 @@ Users:
 
 | Что | Примеры имён | Что сломается |
 | --- | --- | --- |
-| Ядро Android | всё, что начинается с `com.android.`, и сам пакет `android`. Исключения: `com.android.vending`, `com.android.chrome` и два пакета `com.android.hotwordenrollment.*` (обучение голоса для «Окей, Google»), они названы в списках | Загрузка, звонки, Bluetooth, NFC, настройки, интерфейс |
+| Ядро Android | всё, что начинается с `com.android.`, и сам пакет `android`. Исключения: `com.android.vending`, `com.android.chrome`, `com.android.traceur` (System Tracing, инструмент для разработчиков) и два пакета `com.android.hotwordenrollment.*` (обучение голоса для «Окей, Google»), они названы в списках | Загрузка, звонки, Bluetooth, NFC, настройки, интерфейс |
 | Модули Google Mainline | любые `com.google.android.*`, которых нет в твоих списках: `permissioncontroller`, `packageinstaller`, `documentsui`, `ext.services`, `networkstack`, `cellbroadcastreceiver`, `tethering`, `conscrypt` | Разрешения, установка приложений, файлы, сеть, экстренные оповещения |
 | WebView | `com.google.android.webview`, `com.android.webview`, `com.google.android.trichromelibrary` | Страницы внутри приложений перестанут открываться |
 | Qualcomm | `com.qualcomm.*`, `com.qti.*`, `vendor.qti.*`, `org.codeaurora.*` | Модем, GPS, Wi-Fi, звук |
@@ -578,7 +577,7 @@ sleep 20
 adb shell svc power reboot
 ```
 
-Если у какой-то строки вместо `Success` написано `Failure: package is non-disable`, пакет защищён системой. Пока пропусти его: пакет останется на телефоне, и ничего другого не сломается. Убрать такие пакеты можно только тем же приёмом, что Gboard в Шаге 6. Для Amazon App Manager и PayJoy он описан в Шаге 6а, для остальных пакетов нет.
+Если у какой-то строки вместо `Success` написано `Failure: package is non-disable`, пакет защищён системой. Пока пропусти его: пакет останется на телефоне, и ничего другого не сломается. Убрать такие пакеты можно только тем же приёмом, что Gboard в Шаге 6. Для Amazon App Manager, PayJoy и пакетов T-Mobile RSU он описан в Шаге 6а, для остальных пакетов нет.
 
 После перезагрузки проверь на телефоне:
 
@@ -693,17 +692,17 @@ adb shell svc power reboot
 В Шаге 2 ты сохранил список всех пакетов (`baseline_before.txt`): в нём 533 строки. В списках Шагов 4–7 из них уже стоят 55 пакетов. Остальные я разобрал по одному. Итог:
 
 - 171 оверлей (путь файла содержит `/overlay/`) и 30 модулей APEX. Их не трогаем: см. раздел «Что нельзя удалять».
-- 277 отдельных пакетов: 75 убираем списками этого шага, ещё 9 строк записаны в списки выключенными (в начале стоит `#`), 193 оставляем. Что именно и почему, написано в таблице в конце шага.
+- 277 отдельных пакетов: 78 убираем списками этого шага, ещё 9 строк записаны в списки выключенными (в начале стоит `#`), 190 оставляем. Что именно и почему, написано в таблице в конце шага.
 
 **Как читать новые списки.** Строка выглядит так: `пакет  # название: что делает`. Если в конце комментария нет знака, назначение пакета описано в открытых источниках. Звёздочка `*` значит, что в открытых источниках пакет не описан, а его назначение понятно по спискам, имени APK или соседнему пакету. Строка с `#` в начале выключена, скрипт её пропускает; знак `?` в такой строке значит, что я не знаю, что делает пакет. Хочешь убрать выключенный пакет, сотри ` #  ` в начале строки и повтори удаление.
 
 Как и в Шагах 4–7, команды убирают пакеты только в основном профиле (`--user 0`). В профиле «Google» они остаются. Рабочий профиль Shelter чистится в Шаге 11: новые списки добавлены и туда.
 
-**1. Остатки Google: 13 пакетов (на ПК)**
+**1. Остатки Google: 16 пакетов (на ПК)**
 
-Что внутри: приложение Google Fi (`apps.tycho`) и автоподключение к Wi-Fi операторов (`carrierwifi`); служебные пакеты первой настройки (`partnersetup`, `onetimeinitializer`, `searchselector`); отправка отчётов об ошибках (`feedback`); Android Device Policy (`clouddpc`); Android AICore, служба ИИ-моделей Gemini Nano (`aicore`; это не Moto AICore из пункта 6 Шага 5); ARCore, дополненная реальность (`ar.core`); Cross-device services (`ambient.streaming`); расширение Quick Share (`mosey`); два пакета обучения голоса для «Окей, Google» (`hotwordenrollment`).
+Что внутри: приложение Google Fi (`apps.tycho`) и автоподключение к Wi-Fi операторов (`carrierwifi`); служебные пакеты первой настройки (`partnersetup`, `onetimeinitializer`, `searchselector`); отправка отчётов об ошибках (`feedback`); Android Device Policy (`clouddpc`); Android AICore, служба ИИ-моделей Gemini Nano (`aicore`; это не Moto AICore из пункта 6 Шага 5); ARCore, дополненная реальность (`ar.core`); Cross-device services (`ambient.streaming`); расширение Quick Share (`mosey`); два пакета обучения голоса для «Окей, Google» (`hotwordenrollment`); Android Switch, перенос данных с другого телефона при первой настройке (`apps.restore`); Switch Access, управление переключателями или фронтальной камерой (`accessibility.switchaccess`); System Tracing, инструмент для разработчиков (`traceur`).
 
-Что может перестать работать в основном профиле: приложения с дополненной реальностью, трансляция приложений на Chromebook, ИИ-функции приложений на Android AICore, Quick Share, обучение голоса для «Окей, Google». Без Сервисов Google из Шага 7 многое из этого в основном профиле и так не работало. Android Device Policy нужен только тому, чьим телефоном управляет организация (рабочий аккаунт с политикой устройства): если это про тебя, сотри его строку.
+Что может перестать работать в основном профиле: приложения с дополненной реальностью, трансляция приложений на Chromebook, ИИ-функции приложений на Android AICore, Quick Share, обучение голоса для «Окей, Google», перенос данных с другого телефона при первой настройке, управление переключателями или фронтальной камерой, запись системных трассировок из раздела «Для разработчиков». Без Сервисов Google из Шага 7 многое из этого в основном профиле и так не работало. Android Device Policy нужен только тому, чьим телефоном управляет организация (рабочий аккаунт с политикой устройства): если это про тебя, сотри его строку.
 
 Две строки в конце списка выключены: `com.google.android.as` (Android System Intelligence: Live Caption, Live Translate, умный поворот экрана) и `com.google.android.as.oss` (Private Compute Services, приватная аналитика для него). Если их убрать, эти функции пропадут, а что ещё в Moto от них зависит, я не знаю. Убирай их только вместе.
 
@@ -727,6 +726,9 @@ com.google.android.apps.carrier.carrierwifi  # Google Wi-Fi Provisioner: авт�
 com.google.android.apps.setupwizard.searchselector  # Выбор поисковой системы при первой настройке *
 com.android.hotwordenrollment.okgoogle  # Обучение голоса для «Окей, Google» *
 com.android.hotwordenrollment.xgoogle  # Обучение голоса для «Окей, Google» *
+com.google.android.apps.restore  # Android Switch: перенос данных с другого телефона при первой настройке
+com.google.android.accessibility.switchaccess  # Switch Access: управление телефоном переключателями или фронтальной камерой
+com.android.traceur  # System Tracing: запись системных трассировок (раздел «Для разработчиков»), инструмент для разработчиков
 # com.google.android.as  # Android System Intelligence: Live Caption, Live Translate, умный поворот экрана. Выключено: эти функции пропадут, а что ещё в Moto от него зависит, не знаю. Убирай вместе с as.oss
 # com.google.android.as.oss  # Private Compute Services: приватная аналитика и обучение для Android System Intelligence, по описанию Google. Выключено по той же причине. Убирай вместе с as
 EOF
@@ -854,6 +856,8 @@ adb shell svc power reboot
 
 Ответы те же, что в Шаге 4: `Success` значит, что пакет убран, «на телефоне нет или уже убран, пропускаю» значит, что такого пакета у тебя нет. Если списка операторов у тебя нет, скрипт напишет, что не нашёл файл: это нормально. Если у строки вместо `Success` написано `Failure: package is non-disable`, пропусти этот пакет, как в пункте 4 Шага 5. На Razr Fold так выходят две строки. `com.amazon.appmanager` отвечает `Failure: package is non-disable`: Motorola его защитила. `com.payjoy.access` печатает длинный текст ошибки (трассировку Java) со строкой `java.lang.IllegalArgumentException: Invalid argument`: система и его удалить не даёт. В обоих случаях пакет пока остаётся на телефоне, а скрипт идёт к следующей строке. Оба пакета убираются в Шаге 6а; до этого проверка в пункте 5 тоже их печатает. Пауза `sleep 20` и штатная перезагрузка нужны по той же причине, что и в Шаге 4.
 
+Если ты пользуешься списком операторов, на Razr Fold так выходят ещё три строки: `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` и `com.tmobile.rsuapp` отвечают `Failure: package is non-disable`. Они убираются в Шаге 6а; до этого проверка в пункте 5 тоже их печатает.
+
 **5. Проверь, что пакеты убраны (на ПК)**
 
 Команда не должна напечатать ничего:
@@ -885,13 +889,13 @@ adb shell svc power reboot
 
 **Что я оставил и почему**
 
-Из 277 разобранных пакетов 193 остаются. Оверлеи и модули APEX добавлены в таблицу для полноты.
+Из 277 разобранных пакетов 190 остаются. Оверлеи и модули APEX добавлены в таблицу для полноты.
 
 | Группа | Сколько | Что внутри и почему оставил |
 | --- | --- | --- |
 | Оверлеи | 171 | Подгоняют систему под экраны, оператора и тему. Убирать нельзя. |
 | Модули APEX | 30 | Части Android, которые обновляются отдельно (Bluetooth, экстренные оповещения и другие). Убирать нельзя. |
-| Ядро Android | 67 | Всё, что называется `android` или `com.android.*`: контакты, SIM-меню, печать, провайдеры данных и прочее. Правило из раздела «Что нельзя удалять». |
+| Ядро Android | 66 | Всё, что называется `android` или `com.android.*`: контакты, SIM-меню, печать, провайдеры данных и прочее. Правило из раздела «Что нельзя удалять». |
 | Qualcomm | 29 | `com.qualcomm.*`, `com.qti.*`, `vendor.qti.*`, `org.codeaurora.ims`: модем, GPS, Wi-Fi, звук. |
 | Модули Google для системы | 11 | `packageinstaller`, `documentsui`, `networkstack`, `captiveportallogin`, `ext.shared`, `modulemetadata`, `mainline.adservices`, `mainline.telemetry`, `configupdater`, `webview`, `carrier`. Установка приложений, файлы, сеть, WebView, обновление настроек. |
 | Основа Moto | 14 | `launcher3`, `launcherconfig`, `camera5`, `camera.ai.colortone`, `faceunlock`, `batterycare`, `coresettingsext`, `providers.chromehomepage`, `providers.settings`, `systemserver`, `hce`, `thermalservice`, `ccc.devicemanagement`, `ccc.ota`. Рабочий стол, камера, разблокировка по лицу, батарея, настройки, обновления и управление устройством. |
@@ -900,7 +904,7 @@ adb shell svc power reboot
 | Функции Moto | 23 | `actions`, `actioncore`, `touchshare`, `smartmode`, `deptheffect`, `easyprefix`, `dynamicvolume`, `dolbyvisionservice`, `dolby.dolbyui`, `daxservice`, `clockface`, `personalize`, `activestylus`, `mykey`, `smart5g`, `sstservice`, `aptxmode`, `motosignature`, `motosignature2`, `appdirectedsmsproxy`, `iotservice`, `account`, `gesture`. Жесты и действия Moto, звук, перо, Moto Buds, 5G. Dolby оставлен по проверке автора: она не показала у него обращений в интернет. |
 | Первая настройка и перенос данных | 6 | `setup`, `setupwizard.controller`, `setupwizard.devicesetup`, `setupwizard.phoneservice`, `migrateassist`, `motomigrate`. Понадобятся после сброса телефона. |
 | Телефония | 10 | `entitlement`, `omadm.service`, `carrierconfig`, `carriersettingsext`, `visualvoicemail`, `android.provisioning`, `euiccpartnerapp`, `callredirectionservice`, `msimsettings`, `rcsConfigService`. SIM, настройки оператора, eSIM, голосовая почта, RCS. |
-| Google, которые я оставил | 11 | Описание ниже. |
+| Google, которые я оставил | 9 | Описание ниже. |
 
 **Google, которых я не стал убирать**
 
@@ -908,7 +912,7 @@ adb shell svc power reboot
 - `apps.turbo`: Device Health Services, оценка времени работы батареи. Без него в Настройках → Батарея [может появляться сообщение «Need to pack turbo apk»](https://github.com/ishacker003/turboproxy).
 - `apps.safetyhub`: [Personal Safety](https://sysapps.bayton.org/packages/com.google.android.apps.safetyhub), экстренные функции вроде Emergency SOS и отправки местоположения контактам (по описанию приложения). Не трогал.
 - `apps.scone`: [Adaptive Connectivity Services](https://9to5google.com/2020/12/05/google-adaptive-connectivity-services/). Судя по его разрешениям в [базе bayton](https://sysapps.bayton.org/packages/com.google.android.apps.scone), он связан с настройками и метриками модема. Не трогал.
-- `euicc` (поддержка eSIM), `apps.restore` (перенос данных при первой настройке), `apps.wallpaper` (выбор обоев), `marvin.talkback`, `accessibility.switchaccess` и `tts` (специальные возможности и синтез речи), `apps.wellbeing` (Цифровое благополучие): нужные или полезные функции при небольшом выигрыше от удаления.
+- `euicc` (поддержка eSIM), `apps.wallpaper` (выбор обоев), `marvin.talkback` и `tts` (специальные возможности и синтез речи), `apps.wellbeing` (Цифровое благополучие): нужные или полезные функции при небольшом выигрыше от удаления.
 
 ## Шаг 6. Замени звонилку, SMS, клавиатуру и остальное
 
@@ -1106,7 +1110,7 @@ adb shell svc power reboot
 
 У строки `com.google.android.inputmethod.latin` теперь должно быть `Success`, у уже убранных пакетов ответ «на телефоне нет или уже убран». После перезагрузки открой любое поле ввода: должна появиться новая клавиатура. Если клавиатуры нет совсем, верни Gboard командой `adb shell cmd package install-existing --user 0 com.google.android.inputmethod.latin`, подожди 20 секунд, перезагрузи телефон командой `adb shell svc power reboot` и вернись к пунктам 3 и 4 этого шага: новая клавиатура должна быть включена и выбрана основной, а команда `adb shell settings get secure default_input_method` должна называть именно её. Только потом повтори 5ж.
 
-**Про модуль.** Пока Gboard убран, не удаляй и не выключай ни модуль, ни metamodule: без metamodule модуль не действует, а я не проверял, не вернёт ли Motorola защищённый пакет сама, когда файл снова станет виден. Если после обновления прошивки Gboard опять пишет `non-disable`, открой APatch → APM: красной надписи про metamodule быть не должно (если она есть, повтори 5г), а модуль должен быть в списке и включён. Если всё на месте, а ответ тот же, файл в новой прошивке назвали иначе: повтори 5б–5е. Если `non-disable` пишет какой-то другой пакет, оставь этот пакет на телефоне: модуль из этого шага прячет только файл Gboard. Для Amazon App Manager и PayJoy смотри Шаг 6а. Для любого другого пакета пришлось бы менять строку `PATTERN` из 5в, и этот случай здесь не разобран.
+**Про модуль.** Пока Gboard убран, не удаляй и не выключай ни модуль, ни metamodule: без metamodule модуль не действует, а я не проверял, не вернёт ли Motorola защищённый пакет сама, когда файл снова станет виден. Если после обновления прошивки Gboard опять пишет `non-disable`, открой APatch → APM: красной надписи про metamodule быть не должно (если она есть, повтори 5г), а модуль должен быть в списке и включён. Если всё на месте, а ответ тот же, файл в новой прошивке назвали иначе: повтори 5б–5е. Если `non-disable` пишет какой-то другой пакет, оставь этот пакет на телефоне: модуль из этого шага прячет только файл Gboard. Для Amazon App Manager, PayJoy и пакетов T-Mobile RSU смотри Шаг 6а. Для любого другого пакета пришлось бы менять строку `PATTERN` из 5в, и этот случай здесь не разобран.
 
 **Если телефон не загрузился после установки модуля или metamodule.** Это маловероятно: модуль прячет один файл, а metamodule только подключает файлы модулей. Но если так случилось, включи Безопасный режим APatch: все модули в нём выключены, а в APM работает кнопка «Удалить»: удали то, что ставил последним (metamodule или модуль). [Инструкция APatch](https://apatch.dev/rescue-bootloop.html): удерживай кнопку питания, пока загорится экран, потом нажимай и отпускай её, пока не появится первый экран. В заголовке той страницы упомянута ещё кнопка громкости «вниз», число нажатий не указано, так что способ может потребовать нескольких попыток. Если не получилось, действуй по разделу «Если телефон не загружается» в конце.
 
@@ -1132,9 +1136,11 @@ adb shell cmd package install-existing --user 0 com.google.android.dialer
 
 Возвращённая звонилка не должна мешать: пока звонилкой по умолчанию назначен Fossify Phone, обычные звонки идут через него, а системная нужна только для экстренного вызова. Это по моим знаниям, на твоём телефоне не проверялось.
 
-## Шаг 6а. Ещё два защищённых пакета: Amazon App Manager и PayJoy
+## Шаг 6а. Другие защищённые пакеты: Amazon App Manager, PayJoy и T-Mobile RSU
 
-После Шага 5а на телефоне остаются два пакета из `moto-more.txt`: `com.amazon.appmanager` (ответ `Failure: package is non-disable`) и `com.payjoy.access` (длинная ошибка Java со строкой `IllegalArgumentException: Invalid argument`). Они защищены двумя разными способами, поэтому у каждого свой модуль. Оба модуля работают только через metamodule: если ты его ещё не ставил, сначала сделай 5г и потом возвращайся сюда. Шаги повторяют Шаг 6: собрать модуль, поставить, перезагрузить, проверить. Проверено на Razr Fold: после первого модуля и перезагрузки строка `com.amazon.appmanager` ответила `Success`, а после второго модуля и перезагрузки PayJoy пропал из списка пакетов основного профиля.
+После Шага 5а на телефоне остаются два пакета из `moto-more.txt`: `com.amazon.appmanager` (ответ `Failure: package is non-disable`) и `com.payjoy.access` (длинная ошибка Java со строкой `IllegalArgumentException: Invalid argument`). Они защищены двумя разными способами, поэтому у каждого свой модуль. Все модули этого шага работают только через metamodule: если ты его ещё не ставил, сначала сделай 5г и потом возвращайся сюда. Шаги повторяют Шаг 6: собрать модуль, поставить, перезагрузить, проверить. Проверено на Razr Fold: после первого модуля и перезагрузки строка `com.amazon.appmanager` ответила `Success`, а после второго модуля и перезагрузки PayJoy пропал из списка пакетов основного профиля.
+
+Если ты использовал и список операторов, на телефоне могут остаться ещё три пакета с ответом `non-disable`: `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` и `com.tmobile.rsuapp` (T-Mobile RSU). Они защищены так же, как Amazon App Manager, и у них свой модуль: 6а-7 и 6а-8, последние два пункта этого шага.
 
 Если на любом шаге ответ не такой, как написано, остановись и не переходи к следующему: модули ничего не удаляют, а любой модуль можно убрать в APatch (APM → Удалить).
 
@@ -1296,7 +1302,79 @@ adb shell "ls /product/priv-app | grep -i payjoy"
 
 Первая команда должна напечатать только `package:com.motorola.android.overlay.payjoy`, вторая ничего. Оверлей остаётся: это ресурс без кода, а скрипт удаления оверлеи не трогает. Если пакет самого приложения всё ещё в списке, модуль не подействовал: посмотри в APM (красной надписи про metamodule быть не должно, модуль должен быть в списке и включён), повтори установку и перезагрузку. Если всё равно остаётся, удали модуль (APM → Удалить) и перезагрузи телефон: PayJoy останется на нём выключенным системой.
 
-**Про два модуля.** Пока пакеты убраны, не удаляй и не выключай эти модули и metamodule. Для Amazon App Manager причина та же, что у Gboard: я не проверял, не вернёт ли Motorola защищённый пакет сама, когда файл снова станет виден. PayJoy при удалении его модуля просто вернётся вместе со своей папкой. Я проверял только Razr Fold: после обоих модулей телефон загрузился нормально, а как другие версии прошивки отреагируют на пропавший пакет PayJoy, я не знаю. Что делать после обновления системы, написано в Шаге 10. Если телефон не загрузился после установки модуля, включи Безопасный режим APatch, как описано в Шаге 6 («Если телефон не загрузился после установки модуля или metamodule»), и удали модуль, который ставил последним.
+**6а-7. T-Mobile RSU: собери модуль (на ПК)**
+
+Этот пункт и следующий нужны, только если ты использовал список операторов в Шаге 5а и три его строки про T-Mobile RSU (`com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv`, `com.tmobile.rsuapp`) ответили `Failure: package is non-disable`. Если они ответили `Success` или «на телефоне нет или уже убран, пропускаю», пропусти 6а-7 и 6а-8. Защита такая же, как у Gboard и Amazon App Manager: файлы в папках `nondisable`. Модуль ищет эти файлы не по фиксированному имени: он прячет любой файл в папках `nondisable`, в имени или в тексте которого есть `com.tmobile.rsu`. Ничего не удаляется. Скопируй блок целиком:
+
+```
+cd ~/razr-debloat
+mkdir -p rsu-module
+cd rsu-module
+cat > module.prop <<'EOF'
+id=unprotect_tmobile_rsu
+name=Unprotect T-Mobile RSU packages (Motorola nondisable)
+version=1.0
+versionCode=1
+author=local
+description=Hides the Motorola nondisable markers of the T-Mobile RSU packages so that pm uninstall --user 0 works
+EOF
+cat > customize.sh <<'EOF'
+# Прячет файлы защиты Motorola (nondisable) трёх пакетов T-Mobile RSU от системы.
+# Ничего не удаляет. Файл прячется, если ключ из строки ниже есть в его имени или в его тексте.
+# Ключ подходит к com.tmobile.rsuadapter.qualcomm, com.tmobile.rsusrv и com.tmobile.rsuapp.
+KEY='com.tmobile.rsu'
+
+FOUND=0
+for PART in product system_ext vendor odm system; do
+  if [ "$PART" = system ]; then
+    SRC=/system/etc/nondisable
+    DST=$MODPATH/system/etc/nondisable
+  else
+    SRC=/$PART/etc/nondisable
+    DST=$MODPATH/system/$PART/etc/nondisable
+  fi
+  [ -d "$SRC" ] || continue
+  for F in "$SRC"/*; do
+    [ -f "$F" ] || continue
+    HIT=0
+    case "${F##*/}" in
+      *"$KEY"*) HIT=1 ;;
+    esac
+    if [ "$HIT" = 0 ] && grep -qF "$KEY" "$F" 2>/dev/null; then HIT=1; fi
+    [ "$HIT" = 1 ] || continue
+    mkdir -p "$DST"
+    mknod "$DST/${F##*/}" c 0 0
+    [ -c "$DST/${F##*/}" ] || abort "! mknod failed for $DST/${F##*/}"
+    ui_print "- Hiding marker: $F"
+    FOUND=1
+  done
+done
+
+[ "$FOUND" = 1 ] || abort "! No marker file mentions $KEY in /product /system_ext /vendor /odm /system"
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+EOF
+python3 -m zipfile -c ../unprotect-rsu.zip module.prop customize.sh
+cd ..
+adb push unprotect-rsu.zip /sdcard/Download/
+```
+
+Если `python3` не найден, замени строку с ним на `zip ../unprotect-rsu.zip module.prop customize.sh`.
+
+**6а-8. T-Mobile RSU: поставь модуль и убери пакеты**
+
+На телефоне: APatch → APM → кнопка установки → выбери `unprotect-rsu.zip` в папке Download. В журнале установки должна появиться строка `- Hiding marker:` с путём, по одной на каждый найденный файл. Если вместо неё написано `! No marker file mentions`, модуль не установился: так задумано, прятать нечего, и шаги ниже не подойдут. Потом перезагрузи телефон: кнопкой в журнале или командой `adb shell svc power reboot` на ПК.
+
+После перезагрузки убери пакеты ещё раз (на ПК):
+
+```
+./debloat.sh remove carriers.txt
+sleep 20
+adb shell svc power reboot
+```
+
+Три строки `com.tmobile.rsuadapter.qualcomm`, `com.tmobile.rsusrv` и `com.tmobile.rsuapp` теперь должны ответить `Success`, а уже убранные пакеты отвечают «на телефоне нет или уже убран, пропускаю». Проверено на Razr Fold: после этого модуля и перезагрузки все три пакета удалились. Если какая-то строка всё ещё пишет `non-disable`, модуль не подействовал: проверь то же, что в 5е (красная надпись про metamodule в APM, модуль поставлен раньше metamodule). Если всё на месте, пропусти этот пакет: он останется на телефоне.
+
+**Про модули.** Пока пакеты убраны, не удаляй и не выключай эти модули и metamodule. Для Amazon App Manager и пакетов T-Mobile RSU причина та же, что у Gboard: я не проверял, не вернёт ли Motorola защищённый пакет сама, когда файл снова станет виден. PayJoy при удалении его модуля просто вернётся вместе со своей папкой. Я проверял только Razr Fold: после всех модулей телефон загрузился нормально, а как другие версии прошивки отреагируют на пропавший пакет PayJoy, я не знаю. Что делать после обновления системы, написано в Шаге 10. Если телефон не загрузился после установки модуля, включи Безопасный режим APatch, как описано в Шаге 6 («Если телефон не загрузился после установки модуля или metamodule»), и удали модуль, который ставил последним.
 
 ## Шаг 7. Убери сервисы Google из основного профиля
 
@@ -1472,7 +1550,8 @@ EOF
 chmod +x ~/.shortcuts/google-on.sh ~/.shortcuts/google-off.sh
 ```
 
-3. Долго удерживай пустое место на рабочем столе → Виджеты → Termux:Widget, поставь виджет. Нажми `google-on`, чтобы переключиться в профиль «Google».
+3. Разреши Termux открывать своё окно с рабочего стола: Настройки → Приложения → Termux → Дополнительно → Поверх других приложений → разрешить (или Настройки → Приложения → Специальный доступ → Поверх других приложений). Без этого по нажатию кнопки появляется только сообщение «Termux requires "Display over other apps" permission to start terminal sessions from background…», а скрипт не запускается.
+4. Долго удерживай пустое место на рабочем столе → Виджеты → Termux:Widget, поставь виджет. Нажми `google-on`, чтобы переключиться в профиль «Google».
 
 Скрипт `google-off` работает только из основного профиля. Если автоостановка из пункта 1 работает, он почти не нужен.
 
@@ -1547,7 +1626,7 @@ echo 'com.example.newpackage  # название' >> moto.txt
 
 **Модуль защиты Gboard и metamodule.** Они лежат в `/data/adb/modules`, обновление системы `/data` не трогает, но работает модуль только пока активен APatch, то есть после повторного патча boot. Если при повторном запуске списков Gboard пишет `non-disable`, открой APatch → APM: красной надписи про metamodule быть не должно (если она есть, повтори 5г), а модуль должен быть в списке и включён. Если всё на месте, а ответ тот же, повтори 5б–5е из Шага 6.
 
-**Модули из Шага 6а.** Они тоже лежат в `/data/adb/modules` и работают при том же условии: только пока активен APatch. Если при повторном запуске списков `com.amazon.appmanager` пишет `non-disable` или `com.payjoy.access` печатает ошибку Java, пакет вернулся: открой APatch → APM и проверь, что красной надписи про metamodule нет (если она есть, повтори 5г) и что оба модуля в списке и включены. Если всё на месте, а пакет всё равно вернулся, файл или папку в новой прошивке назвали иначе: удали модуль этого пакета (APM → Удалить), перезагрузи телефон и повтори его шаги из Шага 6а. После обновления системы я этого не проверял.
+**Модули из Шага 6а.** Они тоже лежат в `/data/adb/modules` и работают при том же условии: только пока активен APatch. Если при повторном запуске списков `com.amazon.appmanager` или один из пакетов T-Mobile RSU пишет `non-disable`, либо `com.payjoy.access` печатает ошибку Java, пакет вернулся: открой APatch → APM и проверь, что красной надписи про metamodule нет (если она есть, повтори 5г) и что все модули в списке и включены. Если всё на месте, а пакет всё равно вернулся, файл или папку в новой прошивке назвали иначе: удали модуль этого пакета (APM → Удалить), перезагрузи телефон и повтори его шаги из Шага 6а. После обновления системы я этого не проверял.
 
 ## Шаг 11. Рабочий профиль Shelter: убрать мусор Moto и Google, как в основном профиле
 
@@ -1577,11 +1656,11 @@ adb shell pm list users
 
 ```
 N=12
-{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" '$1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"убрал: " $1 "\"" }' > profile-remove.sh
+{ echo com.google.android.dialer; echo com.motorola.stylus; grep -hEv '^[[:space:]]*(#|$)' google.txt moto.txt moto-extra.txt moto-ai.txt google-roles.txt gms.txt google-more.txt moto-more.txt carriers.txt 2>/dev/null; } | tr -d '\r' | awk -v n="$N" 'BEGIN { print "pm list users | grep -qF \"{" n ":\" || { echo \"нет пользователя " n ": проверь номер командой pm list users\"; exit 1; }" } $1 == "com.motorola.ccc.notification" || $1 !~ /^(android|com\.android\.(systemui|settings|phone|server\.telecom|providers\..*)|com\.qualcomm\..*|com\.motorola\.ccc\..*|.*overlay.*|com\.google\.android\.webview|com\.google\.android\.trichromelibrary)$/ { print "pm uninstall -k --user " n " " $1 " 2>&1 | grep -q Success && echo \"убрал: " $1 "\"" }' > profile-remove.sh
 adb push profile-remove.sh /data/local/tmp/profile-remove.sh
 ```
 
-В первой строке замени 12 на свой номер. Если каких-то файлов у тебя нет, это нормально. Звонилка Google и Moto Notes добавлены в начало списка отдельно: в основном профиле их убирали своими командами (Шаги 6 и 5). Пакет `com.motorola.ccc.notification` в профиле убирается как обычный, как и в Шаге 5; остальные `com.motorola.ccc.*` скрипт по-прежнему пропускает. Списки из Шага 5а подключены так же. Пакеты, которых в профиле нет, команда молча пропускает.
+В первой строке замени 12 на свой номер. Скрипт начинается с проверки, что профиль с таким номером есть: если его нет, он напечатает «нет пользователя 12: проверь номер командой pm list users» и остановится. Если каких-то файлов у тебя нет, это нормально. Звонилка Google и Moto Notes добавлены в начало списка отдельно: в основном профиле их убирали своими командами (Шаги 6 и 5). Пакет `com.motorola.ccc.notification` в профиле убирается как обычный, как и в Шаге 5; остальные `com.motorola.ccc.*` скрипт по-прежнему пропускает. Списки из Шага 5а подключены так же. Пакеты, которых в профиле нет, команда молча пропускает.
 
 **4. Запусти скрипт (на телефоне, в Termux)**
 
@@ -1589,15 +1668,15 @@ adb push profile-remove.sh /data/local/tmp/profile-remove.sh
 su -c 'sh /data/local/tmp/profile-remove.sh'
 ```
 
-За каждый убранный пакет напечатается «убрал: …». Пакеты, которых в профиле нет, и пакеты, которые система не дала убрать, скрипт молча пропускает: оставшиеся покажет проверка в пункте 5. Если root в adb у тебя работает (`adb shell su -c id` печатает `uid=0(root)`), ту же команду можно выполнить с ПК: `adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`.
+За каждый убранный пакет напечатается «убрал: …». Если вместо этого напечатано «нет пользователя …», номер профиля неверный: повтори пункт 2 и собери скрипт заново. Пакеты, которых в профиле нет, и пакеты, которые система не дала убрать, скрипт молча пропускает: оставшиеся покажет проверка в пункте 5. Если root в adb у тебя работает (`adb shell su -c id` печатает `uid=0(root)`), ту же команду можно выполнить с ПК: `adb shell "su -c 'sh /data/local/tmp/profile-remove.sh'"`.
 
 **5. Проверь (на телефоне, в Termux)**
 
 ```
-comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort) | grep -E 'google|motorola'
+comm -13 <(su -c 'pm list packages --user 0' | sort) <(su -c 'pm list packages --user 12' | sort)
 ```
 
-Команда показывает пакеты Google и Moto, которые есть в рабочем профиле, но которых уже нет в основном. Она не должна напечатать ничего. Если что-то напечаталось, скрипт эти пакеты не убрал: система не дала или их не было в твоих списках. Оставь их, профиль с ними работает. Чтобы увидеть причину, убери один пакет вручную (на телефоне, в Termux): `su -c 'pm uninstall -k --user 12 ИМЯ_ПАКЕТА'`, подставив номер своего профиля и имя пакета; ответ `Failure` покажет причину. Другие системные пакеты Google в профиле, например `com.google.android.permissioncontroller` или `com.google.android.webview`, не трогай. Потом перезагрузи телефон с паузой (пункт 6).
+Команда показывает пакеты, которые есть в рабочем профиле, но которых нет в основном. Она не должна напечатать ничего, кроме приложений, которые ты сам поставил в рабочий профиль. Если напечаталось что-то ещё, скрипт эти пакеты не убрал: система не дала или их не было в твоих списках. Оставь их, профиль с ними работает. Чтобы увидеть причину, убери один пакет вручную (на телефоне, в Termux): `su -c 'pm uninstall -k --user 12 ИМЯ_ПАКЕТА'`, подставив номер своего профиля и имя пакета; ответ `Failure` покажет причину. Другие системные пакеты Google в профиле, например `com.google.android.permissioncontroller` или `com.google.android.webview`, не трогай. Потом перезагрузи телефон с паузой (пункт 6).
 
 **6. Перезагрузи телефон с паузой (на ПК)**
 
@@ -1923,9 +2002,11 @@ adb shell svc power reboot
 
 Если захочешь убрать и модуль защиты из Шага 6, сначала верни Gboard этой командой, потом удали модуль: APatch → APM → Удалить, и перезагрузи телефон. Я не проверял, что система делает с уже убранным пакетом, когда его защита возвращается, поэтому порядок такой. Metamodule при этом лучше оставить: без него перестанут подключаться файлы и остальных модулей.
 
-**Вернуть Amazon App Manager и PayJoy (на ПК и на телефоне)**
+**Вернуть Amazon App Manager, PayJoy и T-Mobile RSU (на ПК и на телефоне)**
 
 Amazon App Manager возвращается командой из раздела «Вернуть один пакет»: подставь `com.amazon.appmanager` вместо `com.example.package`. Его строка есть в `moto-more.txt`, поэтому `./debloat.sh restore moto-more.txt` тоже его вернёт. PayJoy через `pm` не прятали, поэтому никакая команда его не вернёт: удали модуль Hide PayJoy Access app (APatch → APM → Удалить) и перезагрузи телефон. Папка приложения снова станет видна, и Android найдёт пакет при загрузке. В каком состоянии он вернётся, я не проверял.
+
+Три пакета T-Mobile RSU возвращаются так же: командой из раздела «Вернуть один пакет» или командой `./debloat.sh restore carriers.txt` (их строки есть в этом списке, и команда возвращает весь список).
 
 **Посмотреть, что сейчас скрыто (на ПК)**
 
